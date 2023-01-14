@@ -10,7 +10,7 @@ Essentially, SuperNodes makes it possible for other unofficial Godot source gene
 
 Naturally, there are a few caveats, and you should only use PowerUps to create wide-reaching behavior to complement other systems, such as automatic ECS integration, logging and analytics, serialization systems, or adding additional state (properties) to nodes. If you create PowerUps for game logic, you risk adding methods and properties whose identifiers conflict with each other (a classic problem when mimicking multiple-inheritance).
 
-> Need help with source generators, SuperNodes, and PowerUps?? Join the [Chickensoft Discord][Discord] and we'll be happy to help you out!
+> Need help with source generators, SuperNodes, and PowerUps? Join the [Chickensoft Discord][Discord] and we'll be happy to help you out!
 
 ## Installation
 
