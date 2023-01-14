@@ -349,10 +349,8 @@ Special thanks to those in the Godot and Chickensoft Discord Servers for supplyi
 [chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
 [discord]: https://discord.gg/gSjaPgMmYW
-<!-- [line-coverage]: NOTHING/YET/https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/line_coverage.svg
-[branch-coverage]: NOTHING/YEThttps://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/branch_coverage.svg -->
-[line-coverage]: SuperNodes.Tests/reports/line_coverage.svg
-[branch-coverage]: SuperNodes.Tests/reports/branch_coverage.svg
+[line-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/line_coverage.svg
+[branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/branch_coverage.svg
 
 <!-- Content -->
 [godot-generator-problems]: https://github.com/godotengine/godot/issues/66597
