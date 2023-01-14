@@ -1,0 +1,9 @@
+SuperNodes.Tests/coverage
+SuperNodes.Tests/badges
+
+.godot/
+bin/
+obj/
+nupkg/
+.generated/
+.vs/

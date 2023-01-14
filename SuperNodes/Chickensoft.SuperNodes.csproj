@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Source generators must target netstandard 2.0 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- We don't want to reference the source generator dll directly in consuming projects -->
+    <!-- Or do we? -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>false</ImplicitUsings>
+    <LangVersion>preview</LangVersion>
+    <RootNamespace>SuperNodes</RootNamespace>
+
+    <Title>SuperNodes</Title>
+    <Description>Supercharge your Godot nodes with power ups and third party source generators, using only one or two lines of boilerplate!</Description>
+    <Copyright>© 2023 Chickensoft Games</Copyright>
+    <Company>Chickensoft</Company>
+
+    <PackageId>Chickensoft.SuperNodes</PackageId>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageVersion>0.1.0</PackageVersion>
+    <PackageReleaseNotes>SuperNodes release.</PackageReleaseNotes>
+    <PackageIcon></PackageIcon>
+    <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Source
+      Generator;Generator;Godot 4;Nodes</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>git@github.com:chickensoft-games/SuperNodes.git</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/chickensoft-games/SuperNodes</RepositoryUrl>
+
+    <!-- To show generated files -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>.generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Has to be in its own item group -->
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- The following libraries include the source generator interfaces and types we need -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
+    <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all">
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- This ensures the library will be packaged as a source generator when we use `dotnet pack` -->
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true"
+      PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+</Project>
