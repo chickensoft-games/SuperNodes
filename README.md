@@ -46,7 +46,7 @@ The SuperNodes generator will inject the `[SuperNode]` attribute into the codeba
 
 Your IDE will probably trigger the source generation automatically, but if it doesn't you can simply run `dotnet build`.
 
-Under the hood, SuperNodes will generate an implementation for the Godot `_Notification` method, allowing it to observe the node's lifecycle events, such as `Ready`, `Process`, `EnterTree`, etc. You can still override the Godot version of those methods, but you can't implement `_Notification` yourself. For the full list of lifecycle handlers, [see below][#lifecycle-handlers].
+Under the hood, SuperNodes will generate an implementation for the Godot `_Notification` method, allowing it to observe the node's lifecycle events, such as `Ready`, `Process`, `EnterTree`, etc. You can still override the Godot version of those methods, but you can't implement `_Notification` yourself. For the full list of lifecycle handlers, [see below](#lifecycle-handlers).
 
 Alternatively, SuperNodes will call any method you've defined that matches a Godot node or object notification and begins with the word `On`, such as `OnReady`, `OnProcess`, `OnWmMouseEnter`, `OnSceneInstantiated` etc. This allows you to easily and consistently define method signatures in C# idiomatically, if that's important to you.
 
