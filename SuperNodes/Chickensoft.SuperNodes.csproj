@@ -9,9 +9,10 @@
     <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>preview</LangVersion>
     <RootNamespace>SuperNodes</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <Title>SuperNodes</Title>
-    <Description>Supercharge your Godot nodes with power ups and third party source generators, using only one or two lines of boilerplate!</Description>
+    <Description>Supercharge your Godot nodes with power ups and third party source generators.</Description>
     <Copyright>© 2023 Chickensoft Games</Copyright>
     <Company>Chickensoft</Company>
 
