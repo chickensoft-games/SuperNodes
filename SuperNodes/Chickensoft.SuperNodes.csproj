@@ -18,7 +18,7 @@
 
     <PackageId>Chickensoft.SuperNodes</PackageId>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>0.1.0-beta</PackageVersion>
+    <PackageVersion>0.2.0-beta</PackageVersion>
     <PackageReleaseNotes>SuperNodes release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Source

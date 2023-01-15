@@ -293,6 +293,7 @@ Note that `OnProcess` and `OnPhysicsProcess` are special cases that each have a 
   - `OnPostinitialize` = `NotificationPostinitialize`
   - `OnPredelete` = `NotificationPredelete`
 - **`Godot.Node` Notifications**
+  - `OnNotification(long what)` = `override _Notification(long what)`
   - `OnEnterTree` = `NotificationEnterTree`
   - `OnWmWindowFocusIn` = `NotificationWmWindowFocusIn`
   - `OnWmWindowFocusOut` = `NotificationWmWindowFocusOut`

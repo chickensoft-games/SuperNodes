@@ -23,7 +23,8 @@ public record GodotNode(
   string[] BaseClasses,
   IList<string> LifecycleMethods,
   IList<string> NotificationHandlers,
-  bool HasPartialNotificationMethod
+  bool HasPartialNotificationMethod,
+  bool HasNotificationMethodHandler
 );
 
 public record PowerUpDescription(
@@ -211,6 +212,16 @@ public partial class SuperNodesGenerator
         method.ParameterList.Parameters.First()!.Identifier.Text == "what"
     ).Any();
 
+    // We want to see if the script implements OnNotification(long). It's
+    // a special case since it has to be called on any notification.
+    var hasNotificationMethodHandler = classDeclaration.Members.Where(
+      member => member is MethodDeclarationSyntax method &&
+        method.ReturnType.ToString() == "void" &&
+        method.Identifier.Text == "OnNotification" &&
+        method.ParameterList.Parameters.Count == 1 &&
+        method.ParameterList.Parameters.First()!.Type?.ToString() == "long"
+    ).Any();
+
     // Find the [SuperNode] attribute on the class.
     var lifecycleMethods = new List<string>();
     var attributes
@@ -256,7 +267,8 @@ public partial class SuperNodesGenerator
         : GetBaseClassHierarchy(symbol),
       LifecycleMethods: lifecycleMethods,
       NotificationHandlers: notificationHandlers,
-      HasPartialNotificationMethod: hasPartialNotificationMethod
+      HasPartialNotificationMethod: hasPartialNotificationMethod,
+      HasNotificationMethodHandler: hasNotificationMethodHandler
     );
   }
 
@@ -392,6 +404,13 @@ public partial class SuperNodesGenerator
           "// Invoke declared lifecycle method handlers."
           )}}
           {{If(lifecycleInvocations.Count > 0, Lines(lifecycleInvocations))}}
+          {{If(
+            node.HasNotificationMethodHandler,
+            """
+            // Invoke the notification handler in the script.
+            OnNotification(what);
+            """
+          )}}
           {{If(
           handlers.Count > 0,
           "// Invoke any notification handlers declared in the script."
