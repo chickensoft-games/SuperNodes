@@ -2,13 +2,17 @@ namespace SuperNodes.Example;
 
 using Godot;
 
-[SuperNode(nameof(MyPowerUp))]
+[SuperNode(nameof(MyPowerUp), "OtherGeneratorMethod")]
 public partial class MyNode : Node {
   public override partial void _Notification(long what);
 
   public void OnReady() { }
 
   public void OnProcess(double _) { }
+
+  public void OnNotification(long what) { }
+
+  public void OtherGeneratorMethod(long _) { }
 }
 
 [PowerUp]
