@@ -40,13 +40,12 @@ public class ChickensoftGeneratorTest {
         namespace Foo
         {
         }
-        """
+        """.ReplaceLineEndings()
       );
 
   [Fact]
 
   public void If() {
-
     ChickensoftGenerator.If(true, "a", "b").ShouldBe("a");
     ChickensoftGenerator.If(false, "a", "b").ShouldBe("b");
     ChickensoftGenerator.If(true, "a").ShouldBe("a");
@@ -78,7 +77,7 @@ public class ChickensoftGeneratorTest {
 
   [Fact]
   public void GetUsings() {
-    var code = """
+    const string code = """
     using A;
     using B;
     namespace Foo {

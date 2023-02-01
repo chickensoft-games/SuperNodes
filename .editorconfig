@@ -153,6 +153,9 @@ dotnet_diagnostic.IDE0059.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.CA1051.severity = none
+dotnet_diagnostic.RCS1070.severity = none
+dotnet_diagnostic.RCS1163.severity = none
+dotnet_diagnostic.IDE0060.severity = none
 
 # C# Style Rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/language-rules#c-style-rules
@@ -163,7 +166,7 @@ csharp_style_var_when_type_is_apparent = true:warning
 csharp_style_var_elsewhere = true:warning
 # Expression-bodied members
 csharp_style_expression_bodied_methods = true:warning
-csharp_style_expression_bodied_constructors = true:warning
+csharp_style_expression_bodied_constructors = false:warning
 csharp_style_expression_bodied_operators = true:warning
 csharp_style_expression_bodied_properties = true:warning
 csharp_style_expression_bodied_indexers = true:warning
@@ -363,12 +366,12 @@ dotnet_naming_rule.private_fields_are_camel_case.style = private_field_style
 
 # Constant fields (not private) (private)
 dotnet_naming_symbols.constant_fields.applicable_kinds = field
-dotnet_naming_symbols.constant_fields.required_modifiers = const
+dotnet_naming_symbols.constant_fields.required_modifiers = const, static
 dotnet_naming_rule.constants_should_be_upper_case.severity = warning
 dotnet_naming_rule.constants_should_be_upper_case.symbols = constants
 dotnet_naming_rule.constants_should_be_upper_case.style = constant_style
 dotnet_naming_symbols.constants.applicable_kinds = field, local
-dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_symbols.constants.required_modifiers = const, static
 dotnet_naming_style.constant_style.capitalization = all_upper
 
 # Static readonly fields (not private) (private)

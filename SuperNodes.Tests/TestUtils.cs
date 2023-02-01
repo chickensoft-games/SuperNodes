@@ -17,12 +17,10 @@ public static class TestUtils {
     var tree = CSharpSyntaxTree.ParseText(code);
     var root = tree.GetRoot();
 
-    var model = CSharpCompilation
+    return CSharpCompilation
       .Create("AssemblyName")
       .AddSyntaxTrees(tree)
       .GetSemanticModel(tree);
-
-    return model;
   }
 
   public static GeneratorOutput Generate(string sourceCode)
@@ -60,7 +58,6 @@ public static class TestUtils {
       .SyntaxTrees
       .Select(tree => tree.ToString())
       .Where(tree => tree is not null)
-      .Cast<string>()
       .ToImmutableArray();
 
     return new GeneratorOutput(Outputs: outputs, Diagnostics: diagnostics);

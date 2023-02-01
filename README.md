@@ -253,7 +253,7 @@ For example, if you tried to apply a PowerUp which extended `Node3D` to a `Node2
 [PowerUp]
 public class MyPowerUp : Node3D { /* ... */ }
 
-[SuperNode]
+[SuperNode(nameof(MyPowerUp))]
 public partial class MySuperNode : Node2D { /* .. */ }
 
 // This won't work: SuperNodes will report a problem because MySuperNode
@@ -269,7 +269,7 @@ SuperNodes calls generated methods and applied power-ups in the order they are s
 For example:
 
 ```csharp
-[SuperNode("Gen1", nameof(MyPowerUp), "Gen2", nameof("OtherPowerUp"))]
+[SuperNode("Gen1", nameof(MyPowerUp), "Gen2", nameof(OtherPowerUp))]
 public partial class MySuperNode : Node { /* ... */ }
 ```
 
@@ -335,6 +335,33 @@ Note that `OnProcess` and `OnPhysicsProcess` are special cases that each have a 
   - `OnDisabled` = `NotificationDisabled`
   - `OnEnabled` = `NotificationEnabled`
   - `OnSceneInstantiated` = `NotificationSceneInstantiated`
+
+## Tips and Tricks
+
+### Interface Implementations
+
+PowerUps can be used to implement an interface on any SuperNode that applies them.
+
+```csharp
+public interface IMyInterface { /* ... */ }
+
+[PowerUp]
+public class MyPowerUp : Node, IMyInterface { /* ... */ }
+
+[SuperNode(nameof(MyPowerUp))]
+public partial class MySuperNode : Node2D { /* .. */ }
+
+/// SuperNodes will generate a partial implementation of MySuperNode in
+/// MySuperNode.MyPowerUp.g.cs that makes MySuperNode implement IMyInterface.
+```
+
+### Static Reflection Lookups
+
+SuperNodes generates static reflection tables for fields and properties.
+
+For example, this node script has a property and a field.
+
+SuperNodes will then generate something like the following:
 
 ## Credits
 

@@ -1,0 +1,6 @@
+root = true
+
+[*.cs]
+generated_code = true
+# Don't suggest making members static.
+dotnet_diagnostic.CA1822.severity = none

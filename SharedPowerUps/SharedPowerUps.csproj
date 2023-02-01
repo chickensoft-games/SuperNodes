@@ -1,0 +1,54 @@
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>contentFiles</ContentTargetFolders>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <NoWarn>CS8021</NoWarn>
+    <NoBuild>true</NoBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <OutputPath>..\LocalPackages</OutputPath>
+
+    <Title>SharedPowerUps</Title>
+    <Version>0.1.0</Version>
+    <Description>SharedPowerUps example.</Description>
+    <Copyright>© 2022 Chickensoft Games</Copyright>
+    <Company>Chickensoft</Company>
+
+    <PackageId>SharedPowerUps</PackageId>
+    <PackageReleaseNotes>SharedPowerUps release.</PackageReleaseNotes>
+    <PackageIcon></PackageIcon>
+    <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;SuperNodes;PowerUps</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl></PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="@(Compile)">
+      <Pack>true</Pack>
+      <PackagePath>$(ContentTargetFolders)\cs\any\$(PackageId)%(RecursiveDir)</PackagePath>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="@(PackageReference)" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <Target Name="Compile" />
+  <Target Name="CopyFilesToOutputDirectory" />
+</Project>

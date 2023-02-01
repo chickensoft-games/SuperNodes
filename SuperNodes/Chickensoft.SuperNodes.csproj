@@ -29,10 +29,6 @@
 
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/chickensoft-games/SuperNodes</RepositoryUrl>
-
-    <!-- To show generated files -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>.generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

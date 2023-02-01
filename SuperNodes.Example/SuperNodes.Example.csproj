@@ -15,5 +15,10 @@
   <ItemGroup>
     <!-- Include SuperNodes as a Source Generator -->
     <ProjectReference Include="..\SuperNodes\Chickensoft.SuperNodes.csproj" PrivateAssets="all" OutputItemType="analyzer" />
+
+    <!-- Include a shared PowerUp from a source-only nuget package -->
+    <!-- You can share PowerUps as nuget packages! -->
+    <!-- For more information, see ../SharedPowerUps/README.md -->
+    <PackageReference Include="SharedPowerUps" Version="0.1.0" PrivateAssets="all" />
   </ItemGroup>
 </Project>
