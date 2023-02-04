@@ -553,6 +553,12 @@ namespace MyNamespace {
 #nullable disable
 ```
 
+### 🔌 Sharing PowerUps in Separate Packages
+
+PowerUps can be distributed as source-only nuget packages! An example repository, `SharedPowerUps` is included to illustrate how to create a source-only nuget package.
+
+The included example project, `SuperNodes.Example`, shows how to reference a source-only nuget package. Source-only packages have to be carefully designed so that they are fed into the consuming package's source generators. You can [read all about it here](SharedPowerUps/README.md).
+
 ## 🙏 Credits
 
 This project would not have been possible without all the amazing resources at [csharp-generator-resources][generators].
