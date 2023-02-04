@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-public class ChickensoftGenerator {
+public abstract class ChickensoftGenerator {
   /// <summary>Spaces per tab. Adjust to your generator's liking.</summary>
   public static int SPACES_PER_TAB = 2;
 
@@ -58,7 +58,10 @@ public class ChickensoftGenerator {
   public static string Format(string code) {
     var tree = CSharpSyntaxTree.ParseText(code);
     var root = tree.GetRoot();
-    return root.NormalizeWhitespace(indentation: Tab(1)).ToFullString();
+    return root
+      .NormalizeWhitespace(indentation: Tab(1))
+      .ToFullString()
+      .ReplaceLineEndings();
   }
 
   /// <summary>
@@ -110,8 +113,8 @@ public class ChickensoftGenerator {
         }
       }
     }
-    return allUsings.Select(@using => @using.Name.ToString())
-      .Where(@using => @using != "Godot")
+    return allUsings
+      .Select(@using => @using.Name.ToString())
       .ToImmutableHashSet();
   }
 }

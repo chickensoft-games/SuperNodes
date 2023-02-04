@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 public readonly record struct GeneratorOutput(
-  IList<string> Outputs,
+  IDictionary<string, string> Outputs,
   IList<Diagnostic> Diagnostics
 );
 
@@ -17,12 +17,10 @@ public static class TestUtils {
     var tree = CSharpSyntaxTree.ParseText(code);
     var root = tree.GetRoot();
 
-    var model = CSharpCompilation
+    return CSharpCompilation
       .Create("AssemblyName")
       .AddSyntaxTrees(tree)
       .GetSemanticModel(tree);
-
-    return model;
   }
 
   public static GeneratorOutput Generate(string sourceCode)
@@ -56,13 +54,16 @@ public static class TestUtils {
         out var diagnostics
       );
 
-    var outputs = outputCompilation
-      .SyntaxTrees
-      .Select(tree => tree.ToString())
-      .Where(tree => tree is not null)
-      .Cast<string>()
-      .ToImmutableArray();
+    var outputs = new Dictionary<string, string>();
+    foreach (var output in outputCompilation.SyntaxTrees) {
+      var text = output.ToString();
+      if (text is not null && !sources.Contains(text)) {
+        outputs.Add(output.FilePath, text);
+      }
+    }
 
-    return new GeneratorOutput(Outputs: outputs, Diagnostics: diagnostics);
+    return new GeneratorOutput(
+      Outputs: outputs.ToImmutableDictionary(), Diagnostics: diagnostics
+    );
   }
 }

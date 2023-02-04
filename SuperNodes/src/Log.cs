@@ -2,9 +2,10 @@ namespace SuperNodes;
 
 using System.Collections.Generic;
 
-
-// Simple, but effective.
-// Inspired by https://dev.to/panoukos41/debugging-c-source-generators-1flm.
+/// <summary>
+/// Simple, but effective.
+/// Inspired by https://dev.to/panoukos41/debugging-c-source-generators-1flm.
+/// </summary>
 public class Log {
   protected List<string> _logs { get; } = new();
 
@@ -12,7 +13,9 @@ public class Log {
 #if DEBUG
     _logs.Add("//\t" + msg);
 #endif
+#pragma warning disable RCS1134
     return;
+#pragma warning restore RCS1134
   }
 
   public void Clear() => _logs.Clear();

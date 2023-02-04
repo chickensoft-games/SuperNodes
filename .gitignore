@@ -1,6 +1,7 @@
 SuperNodes.Tests/coverage
 SuperNodes.Tests/badges
 
+LocalPackages/
 .godot/
 bin/
 obj/
