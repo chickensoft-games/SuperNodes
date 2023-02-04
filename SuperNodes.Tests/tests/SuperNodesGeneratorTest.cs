@@ -9,24 +9,57 @@ public class SuperNodesGeneratorTest {
   public void InjectsRequiredCode() {
     var result = TestUtils.Generate("");
 
-    result.Outputs.Any(
+    result.Outputs.Values.Any(
       output => output.Contains("class SuperNodeAttribute : Attribute")
     ).ShouldBeTrue();
 
-    result.Outputs.Any(
+    result.Outputs.Values.Any(
       output => output.Contains("class PowerUpAttribute : Attribute")
     ).ShouldBeTrue();
 
-    result.Outputs.Any(output => output.Contains("ITypeReceiver"))
+    result.Outputs.Values.Any(output => output.Contains("ITypeReceiver"))
       .ShouldBeTrue();
-    result.Outputs.Any(
+    result.Outputs.Values.Any(
       output => output.Contains("record ScriptAttributeDescription")
     ).ShouldBeTrue();
-    result.Outputs.Any(
+    result.Outputs.Values.Any(
       output => output.Contains("record struct ScriptPropertyOrField")
     ).ShouldBeTrue();
 
     result.Diagnostics.ShouldBeEmpty();
+  }
+
+  [Fact]
+  public void GeneratedPowerUpThatUsesReflectionDoesNotIncludeStubs() {
+    var result = TestUtils.Generate("""
+      namespace GeneratorTest;
+      public interface IReflectivePowerUp { }
+
+      [PowerUp]
+      public class SomePowerUpThatUsesReflection : Node, IReflectivePowerUp {
+        // Stubs for the generated static reflection tables generated on
+        // SuperNodes
+        internal static ScriptPropertyOrField[] PropertiesAndFields { get; }
+          = default!;
+        internal static TResult GetScriptPropertyOrFieldType<TResult>(
+          string scriptProperty, ITypeReceiver<TResult> receiver
+        ) => default!;
+
+        void OnSomePowerUpThatUsesReflection(int what) {}
+      }
+
+      [SuperNode(nameof(SomePowerUpThatUsesReflection))]
+      public class MyNode : Node {
+        public override partial void _Notification(long what);
+      }
+    """);
+
+    result.Outputs.Any(
+      output => output.Key.Contains("SomePowerUpThatUsesReflection") && (
+        output.Value.Contains("internal static ScriptPropertyOrField[]") ||
+        output.Value.Contains("internal static TResult GetScriptPropertyOrFieldType")
+      )
+    ).ShouldBeFalse();
   }
 
   [Fact]
@@ -217,7 +250,7 @@ namespace GeneratorTest {
 """.ReplaceLineEndings();
 
     // Even with line ending normalization, sometimes whitespace is still off
-    var fuzz = FuzzySharp.Process.ExtractOne(text, result.Outputs);
+    var fuzz = FuzzySharp.Process.ExtractOne(text, result.Outputs.Values);
     fuzz.Score.ShouldBeGreaterThanOrEqualTo(99);
   }
 
@@ -238,7 +271,7 @@ namespace GeneratorTest {
     }
     """);
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -307,7 +340,7 @@ namespace GeneratorTest {
     }
     """);
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -364,7 +397,7 @@ namespace GeneratorTest {
     }
     """);
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -394,7 +427,7 @@ namespace GeneratorTest {
     #nullable disable
     """.ReplaceLineEndings())).ShouldBeTrue();
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -437,7 +470,7 @@ namespace GeneratorTest {
     }
     """);
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -467,7 +500,7 @@ namespace GeneratorTest {
     #nullable disable
     """.ReplaceLineEndings())).ShouldBeTrue();
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 
@@ -539,7 +572,7 @@ namespace GeneratorTest {
     }
     """);
 
-    result.Outputs.Any(output => output.Contains("""
+    result.Outputs.Values.Any(output => output.Contains("""
     #nullable enable
     using Godot;
 

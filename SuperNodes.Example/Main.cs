@@ -19,7 +19,7 @@ public interface IMyPowerUpGeneric<TSomethingA, TSomethingB> { }
 public interface IMyPowerUp { }
 
 [PowerUp]
-public abstract partial class MyPowerUp : Node, IMyPowerUp {
+public abstract partial class MyPowerUp : Node, IMyPowerUp, IMyPowerUpGeneric<string, bool> {
   private readonly struct MyTypeReceiver : ITypeReceiver<bool> {
     public Node Node { get; }
 

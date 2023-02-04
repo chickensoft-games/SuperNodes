@@ -51,7 +51,7 @@ public record GodotNode(
   IImmutableSet<string> Usings
 ) {
   public string FilenamePrefix
-    => Namespace is not null ? $"{Namespace}.{Name}" : Name;
+    => Namespace is not null and not "" ? $"{Namespace}.{Name}" : Name;
 }
 
 public record PowerUpDescription(
@@ -183,7 +183,7 @@ public partial class SuperNodesGenerator
     .SelectMany(list => list.Attributes)
     .Any(attribute => attribute.Name.ToString() == POWER_UP_ATTRIBUTE_NAME);
 
-  public PowerUpDescription GetPowerUpSyntaxCandidate(
+  public static PowerUpDescription GetPowerUpSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) {
     var node = (ClassDeclarationSyntax)context.Node;
@@ -215,12 +215,6 @@ public partial class SuperNodesGenerator
     var allInterfaces = symbol?.AllInterfaces ??
       new ImmutableArray<INamedTypeSymbol>();
 
-    _log.Print("All interfaces: ");
-
-    foreach (var @interface in allInterfaces) {
-      _log.Print($"  {@interface.Name}");
-    }
-
     var interfaces = allInterfaces
       .Where(@interface => powerUpInterfaces.Contains(@interface.Name))
       .Select(
@@ -229,14 +223,6 @@ public partial class SuperNodesGenerator
         )
       )
       .ToArray();
-
-    _log.Print("Remaining interfaces: ");
-
-    foreach (var @interface in interfaces) {
-      _log.Print($"  {@interface}");
-    }
-
-    _log.Print("Done showing remaining interfaces.");
 
     var @namespace = symbol?.ContainingNamespace.ToString();
 

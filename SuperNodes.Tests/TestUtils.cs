@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 public readonly record struct GeneratorOutput(
-  IList<string> Outputs,
+  IDictionary<string, string> Outputs,
   IList<Diagnostic> Diagnostics
 );
 
@@ -54,12 +54,16 @@ public static class TestUtils {
         out var diagnostics
       );
 
-    var outputs = outputCompilation
-      .SyntaxTrees
-      .Select(tree => tree.ToString())
-      .Where(tree => tree is not null)
-      .ToImmutableArray();
+    var outputs = new Dictionary<string, string>();
+    foreach (var output in outputCompilation.SyntaxTrees) {
+      var text = output.ToString();
+      if (text is not null && !sources.Contains(text)) {
+        outputs.Add(output.FilePath, text);
+      }
+    }
 
-    return new GeneratorOutput(Outputs: outputs, Diagnostics: diagnostics);
+    return new GeneratorOutput(
+      Outputs: outputs.ToImmutableDictionary(), Diagnostics: diagnostics
+    );
   }
 }
