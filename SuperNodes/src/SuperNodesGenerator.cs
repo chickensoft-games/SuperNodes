@@ -183,7 +183,7 @@ public partial class SuperNodesGenerator
     .SelectMany(list => list.Attributes)
     .Any(attribute => attribute.Name.ToString() == POWER_UP_ATTRIBUTE_NAME);
 
-  public static PowerUpDescription GetPowerUpSyntaxCandidate(
+  public PowerUpDescription GetPowerUpSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) {
     var node = (ClassDeclarationSyntax)context.Node;
@@ -196,22 +196,47 @@ public partial class SuperNodesGenerator
     var baseClass = baseType ?? "Godot.Node";
 
     // get only the interfaces shown in the power-up's source code
-    var powerUpInterfaces = (
+    var plainInterfaces = (
       node.BaseList?.Types
       .Where(type => type.Type is IdentifierNameSyntax)
       .Select(type => (type.Type as IdentifierNameSyntax)!.Identifier.Text)
       .ToImmutableHashSet()
     ) ?? new HashSet<string>().ToImmutableHashSet();
 
-    var interfaces = symbol?.AllInterfaces
+    var genericInterfaces = (
+      node.BaseList?.Types
+      .Where(type => type.Type is GenericNameSyntax)
+      .Select(type => (type.Type as GenericNameSyntax)!.Identifier.Text)
+      .ToImmutableHashSet()
+    ) ?? new HashSet<string>().ToImmutableHashSet();
+
+    var powerUpInterfaces = plainInterfaces.Union(genericInterfaces);
+
+    var allInterfaces = symbol?.AllInterfaces ??
+      new ImmutableArray<INamedTypeSymbol>();
+
+    _log.Print("All interfaces: ");
+
+    foreach (var @interface in allInterfaces) {
+      _log.Print($"  {@interface.Name}");
+    }
+
+    var interfaces = allInterfaces
       .Where(@interface => powerUpInterfaces.Contains(@interface.Name))
       .Select(
         @interface => @interface.ToDisplayString(
           SymbolDisplayFormat.FullyQualifiedFormat
         )
       )
-      .ToArray()
-      ?? Array.Empty<string>();
+      .ToArray();
+
+    _log.Print("Remaining interfaces: ");
+
+    foreach (var @interface in interfaces) {
+      _log.Print($"  {@interface}");
+    }
+
+    _log.Print("Done showing remaining interfaces.");
 
     var @namespace = symbol?.ContainingNamespace.ToString();
 

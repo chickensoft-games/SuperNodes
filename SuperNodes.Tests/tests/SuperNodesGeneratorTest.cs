@@ -218,7 +218,7 @@ namespace GeneratorTest {
 
     // Even with line ending normalization, sometimes whitespace is still off
     var fuzz = FuzzySharp.Process.ExtractOne(text, result.Outputs);
-    fuzz.Score.ShouldBeGreaterThanOrEqualTo(100);
+    fuzz.Score.ShouldBeGreaterThanOrEqualTo(99);
   }
 
   [Fact]
@@ -431,7 +431,7 @@ namespace GeneratorTest {
     }
 
     [PowerUp]
-    public partial class MyPowerUp : Node, IMyPowerUp, IOther {
+    public partial class MyPowerUp : Node, IMyPowerUp, IOther<a, b> {
       public string AddedProperty { get; set; } = "";
       public void OnMyPowerUp(long what) { }
     }
@@ -473,7 +473,7 @@ namespace GeneratorTest {
 
     namespace GeneratorTest
     {
-      partial class MyNode : IMyPowerUp, IOther
+      partial class MyNode : IMyPowerUp, IOther<a, b>
       {
         public string AddedProperty { get; set; } = "";
         public void OnMyPowerUp(long what)

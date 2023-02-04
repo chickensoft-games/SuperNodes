@@ -15,6 +15,7 @@ public partial class MyNode : Node {
   public void OnProcess(double _) { }
 }
 
+public interface IMyPowerUpGeneric<TSomethingA, TSomethingB> { }
 public interface IMyPowerUp { }
 
 [PowerUp]
