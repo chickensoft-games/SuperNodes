@@ -198,7 +198,7 @@ namespace MyProject;
 using Godot;
 using SuperNodes;
 
-[SuperNode("PrintOnReady", nameof(PrintOnTreePowerUp))]
+[SuperNode("PrintOnReady", typeof(PrintOnTreePowerUp))]
 public partial class MySuperNode : Node {
   public override partial void _Notification(long what);
   
@@ -259,7 +259,7 @@ For example, if you tried to apply a PowerUp which extended `Node3D` to a `Node2
 [PowerUp]
 public class MyPowerUp : Node3D { /* ... */ }
 
-[SuperNode(nameof(MyPowerUp))]
+[SuperNode(typeof(MyPowerUp))]
 public partial class MySuperNode : Node2D { /* .. */ }
 
 // This won't work: SuperNodes will report a problem because MySuperNode
@@ -275,7 +275,7 @@ SuperNodes calls generated methods and applied power-ups in the order they are s
 For example:
 
 ```csharp
-[SuperNode("Gen1", nameof(MyPowerUp), "Gen2", nameof(OtherPowerUp))]
+[SuperNode("Gen1", typeof(MyPowerUp), "Gen2", typeof(OtherPowerUp))]
 public partial class MySuperNode : Node { /* ... */ }
 ```
 
@@ -354,7 +354,7 @@ public interface IMyInterface { /* ... */ }
 [PowerUp]
 public class MyPowerUp : Node, IMyInterface { /* ... */ }
 
-[SuperNode(nameof(MyPowerUp))]
+[SuperNode(typeof(MyPowerUp))]
 public partial class MySuperNode : Node2D { /* .. */ }
 
 /// SuperNodes will generate a partial implementation of MySuperNode in
