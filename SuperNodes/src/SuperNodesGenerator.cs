@@ -541,17 +541,6 @@ public partial class SuperNodesGenerator
       }
     ).ToImmutableList();
 
-    // var lifecycleInvocations = node.LifecycleMethods.Select(
-    //   method => $"{method}(what);"
-    // ).Concat(
-    //   node.SpecifiedPowerUps.Where(
-    //     pair => powerUps.ContainsKey(pair.Key) &&
-    //       powerUps[pair.Key].HasOnPowerUpMethod
-    //   ).Select(
-    //     pair => $"On{powerUps[pair.Key].Name}(what);"
-    //   )
-    // ).ToImmutableList();
-
     // Create a switch/case for every implemented notification handler, such
     // as OnReady, OnPhysicsProcess, etc.
     var handlers = new List<string>();
