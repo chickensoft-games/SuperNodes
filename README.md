@@ -588,7 +588,13 @@ public partial class MyNode : Node {
 
 The code above describes a PowerUp that checks to see if its parent node is the expected type once it is ready. `HasParentOfType` receives one generic type argument which represents the type of parent to check for.
 
-At build time, the SuperNodes generator will substitute `TParent` for `Node3D` when the PowerUp is applied to the SuperNode `MyNode`, since `Node3D` is specified as the generic type argument in the `[SuperNode(typeof(HasParentOfType<Node3D>))]` attribute.
+At build time, the SuperNodes generator will substitute every reference to `TParent` for `Node3D` when the PowerUp is applied to the SuperNode `MyNode`, since `Node3D` is specified as the generic type argument in the `[SuperNode(typeof(HasParentOfType<Node3D>))]` attribute.
+
+> The process of substituting generic type arguments at build time is similar to features found in other programming languages, such as C++ templates, but different from reified types available at runtime that are found in most managed languages like Java, C#, and Dart.
+
+SuperNodes will generate an implementation file named `MyProject.MyNode_HasParentOfType.g.cs` which will contain the following:
+
+```csharp
 
 The generated code in `MyProject.MyNode_HasParentOfType.g.cs` will look something like the following:
 
