@@ -531,7 +531,10 @@ public partial class SuperNodesGenerator
     var node = item.Node;
     var powerUps = item.PowerUps;
 
-    var lifecycleInvocations = node.LifecycleHooks.Select(
+    var lifecycleInvocations = node.LifecycleHooks.Where(
+      hook => hook is not PowerUpHook powerUpHook ||
+        powerUps[powerUpHook.FullName].HasOnPowerUpMethod
+    ).Select(
       hook => {
         if (hook is PowerUpHook powerUpHook) {
           return $"On{powerUps[powerUpHook.FullName].Name}(what);";
