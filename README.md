@@ -559,6 +559,61 @@ PowerUps can be distributed as source-only nuget packages! An example repository
 
 The included example project, `SuperNodes.Example`, shows how to reference a source-only nuget package. Source-only packages have to be carefully designed so that they are fed into the consuming package's source generators. You can [read all about it here](SharedPowerUps/README.md).
 
+### ♻️ Generic PowerUps
+
+PowerUps can specify type parameters that will be substituted at runtime for the specific type arguments given in the `[SuperNode]` attribute.
+
+```csharp
+namespace MyProject;
+
+using System;
+using Godot;
+
+[PowerUp]
+public partial class HasParentOfType<TParent> : Node {
+  public void OnHasParentOfType(long what) {
+    if (what == NotificationReady && GetParent() is not TParent) {
+      throw new InvalidOperationException(
+        $"MyPowerUp can only be used on a child of {typeof(TParent)}"
+      );
+    }
+  }
+}
+
+[SuperNode(typeof(HasParentOfType<Node3D>))]
+public partial class MyNode : Node {
+  public override partial void _Notification(long what);
+}
+```
+
+The code above describes a PowerUp that checks to see if its parent node is the expected type once it is ready. `HasParentOfType` receives one generic type argument which represents the type of parent to check for.
+
+At build time, the SuperNodes generator will substitute `TParent` for `Node3D` when the PowerUp is applied to the SuperNode `MyNode`, since `Node3D` is specified as the generic type argument in the `[SuperNode(typeof(HasParentOfType<Node3D>))]` attribute.
+
+The generated code in `MyProject.MyNode_HasParentOfType.g.cs` will look something like the following:
+
+```csharp
+#nullable enable
+using Godot;
+using System;
+
+namespace MyProject
+{
+  partial class MyNode
+  {
+    public void OnHasParentOfType(long what)
+    {
+      if (what == NotificationReady && GetParent() is not global::Godot.Node3D)
+      {
+        throw new InvalidOperationException($"MyPowerUp can only be used on a child of {typeof(global::Godot.Node3D)}");
+      }
+    }
+  }
+}
+#nullable disable
+
+```
+
 ## 🙏 Credits
 
 This project would not have been possible without all the amazing resources at [csharp-generator-resources][generators].
