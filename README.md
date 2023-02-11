@@ -595,10 +595,6 @@ At build time, the SuperNodes generator will substitute every reference to `TPar
 SuperNodes will generate an implementation file named `MyProject.MyNode_HasParentOfType.g.cs` which will contain the following:
 
 ```csharp
-
-The generated code in `MyProject.MyNode_HasParentOfType.g.cs` will look something like the following:
-
-```csharp
 #nullable enable
 using Godot;
 using System;
