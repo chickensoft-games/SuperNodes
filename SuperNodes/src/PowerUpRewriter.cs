@@ -14,14 +14,35 @@ public class PowerUpRewriter : CSharpSyntaxRewriter {
   /// </summary>
   public ImmutableDictionary<string, string> TypeParameters { get; }
 
+  /// <summary>
+  /// Name of the PowerUp class that's being rewritten.
+  /// </summary>
+  public string PowerUpClassName { get; }
+
+  /// <summary>
+  /// Name of the SuperNode class that is applying the PowerUp.
+  /// </summary>
+  public string SuperNodeClassName { get; }
+
   public PowerUpRewriter(
-    ImmutableDictionary<string, string> typeParameters
+    ImmutableDictionary<string, string> typeParameters,
+    string powerUpClassName,
+    string superNodeClassName
   ) {
     TypeParameters = typeParameters;
+    PowerUpClassName = powerUpClassName;
+    SuperNodeClassName = superNodeClassName;
   }
 
-  //! TODO: Also replace references to the static name of the power up class
-  //! with the name of the script class it is being applied to.
+  public override SyntaxNode? VisitGenericName(GenericNameSyntax node) {
+    if (node.Identifier.ValueText == PowerUpClassName) {
+      return SyntaxFactory
+        .IdentifierName(SyntaxFactory.Identifier(SuperNodeClassName))
+        .WithTriviaFrom(node);
+    }
+
+    return base.VisitGenericName(node);
+  }
 
   public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) {
     // Rewrite any and all identifiers that match the type parameters we know
@@ -30,8 +51,15 @@ public class PowerUpRewriter : CSharpSyntaxRewriter {
     // As long as power-ups don't have conflicting identifiers (e.g., a variable
     // named "T" and a type parameter named "T"), this should be fine.
     if (TypeParameters.TryGetValue(node.Identifier.Text, out var replacement)) {
-      // return SyntaxFactory.ParseExpression(replacement);
-      return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(replacement)).WithTriviaFrom(node);
+      return SyntaxFactory
+        .IdentifierName(SyntaxFactory.Identifier(replacement))
+        .WithTriviaFrom(node);
+    }
+
+    if (node.Identifier.ValueText == PowerUpClassName) {
+      return SyntaxFactory
+        .IdentifierName(SyntaxFactory.Identifier(SuperNodeClassName))
+        .WithTriviaFrom(node);
     }
 
     return base.VisitIdentifierName(node);

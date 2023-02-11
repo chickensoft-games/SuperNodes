@@ -29,6 +29,8 @@ public interface IMyPowerUp { }
 
 [PowerUp]
 public abstract partial class MyPowerUp<TA, TB> : Node, IMyPowerUp, IMyPowerUpGeneric<string, bool> {
+  public static int MyNumber { get; set; } = 42;
+
   private readonly struct MyTypeReceiver : ITypeReceiver<bool> {
     public Node Node { get; }
 
@@ -42,6 +44,7 @@ public abstract partial class MyPowerUp<TA, TB> : Node, IMyPowerUp, IMyPowerUpGe
   public string AddedProperty { get; set; } = "";
 
   public void OnMyPowerUp(long what) {
+    MyPowerUp<TA, TB>.MyNumber = 10;
     if (what == Node.NotificationReady) {
       var receiver = new MyTypeReceiver(this);
       GD.Print(

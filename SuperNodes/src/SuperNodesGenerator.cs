@@ -746,6 +746,14 @@ public partial class SuperNodesGenerator
     // a partial class of the specific node script it's applied to.
 
     var tree = CSharpSyntaxTree.ParseText(powerUp.Source);
+
+    var typeParameterSubstitutions = new Dictionary<string, string>();
+    for (var i = 0; i < powerUp.TypeParameters.Length; i++) {
+      var typeParameter = powerUp.TypeParameters[i];
+      var correspondingPowerUpHook = node.PowerUpHooksByFullName[powerUp.FullName];
+      typeParameterSubstitutions[typeParameter] = correspondingPowerUpHook.TypeArguments[i];
+    }
+
     var root = (CompilationUnitSyntax)tree.GetRoot();
     var classDeclaration = (ClassDeclarationSyntax)root.Members.First();
     var interfaces = powerUp.Interfaces;
@@ -831,22 +839,19 @@ public partial class SuperNodesGenerator
       );
     }
 
-    var typeParameterSubstitutions = new Dictionary<string, string>();
-    for (var i = 0; i < powerUp.TypeParameters.Length; i++) {
-      var typeParameter = powerUp.TypeParameters[i];
-      var correspondingPowerUpHook = node.PowerUpHooksByFullName[powerUp.FullName];
-      typeParameterSubstitutions[typeParameter] = correspondingPowerUpHook.TypeArguments[i];
-    }
-
     // Edit the user's power up class tree based on the above changes.
     root = root.ReplaceNode(classDeclaration, newClassDeclaration);
     tree = tree.WithRootAndOptions(root, tree.Options);
 
     var powerUpRewriter = new PowerUpRewriter(
-      typeParameters: typeParameterSubstitutions.ToImmutableDictionary()
+      log: _log,
+      typeParameters: typeParameterSubstitutions.ToImmutableDictionary(),
+      powerUpClassName: powerUp.Name,
+      superNodeClassName: node.Name
     );
 
     // Rewrite the user's power up class tree to substitute type parameters
+    // and static references to the power-up class with the specific node class
     tree = tree.WithRootAndOptions(
       powerUpRewriter.Visit(tree.GetRoot()), tree.Options
     );
