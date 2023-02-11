@@ -1,12 +1,14 @@
 namespace SuperNodes;
 
-using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 public partial class SuperNodesGenerator {
   public const string VOID = "void";
-  public static string[] Args(params string[] args) => args;
-  public static readonly string[] NoArgs = Array.Empty<string>();
+  public static ImmutableArray<string> Args(params string[] args)
+    => args.ToImmutableArray();
+  public static readonly ImmutableArray<string> NoArgs
+    = ImmutableArray<string>.Empty;
 
   /// <summary>
   /// Map of lifecycle method handlers that script classes can implement to the
@@ -163,28 +165,29 @@ public partial class SuperNodesGenerator {
     [AttributeUsage(AttributeTargets.Class)]
     internal class SuperNodeAttribute : Attribute {
       /// <summary>
-      /// Source generator lifecycle methods to invoke from
+      /// Source generator lifecycle methods and/or PowerUps to invoke from
       /// <see cref="Godot.Object._Notification(long)" />.
       /// </summary>
-      internal string[] Methods { get; set; }
+      internal object[] Args { get; }
 
       /// <summary>
       /// SuperNode attribute. Add this to a Godot node script class to use
       /// functionality from other compatible source generators.
       /// </summary>
-      internal SuperNodeAttribute() => Methods = Array.Empty<string>();
+      internal SuperNodeAttribute() => Args = Array.Empty<object>();
 
       /// <summary>
       /// SuperNode attribute. Add this to a Godot node script class to use
       /// functionality from other compatible source generators.
       /// <br />
-      /// Compatible source generator lifecycle methods will be invoked from
+      /// Compatible source generator lifecycle methods or PowerUps that will
+      /// be invoked from
       /// <see cref="Godot.Object._Notification(long)"/> in the order specified
       /// here.
       /// </summary>
-      /// <param name="methods">Compatible source generator lifecycle method
-      /// names.</param>
-      internal SuperNodeAttribute(params string[] methods) => Methods = methods;
+      /// <param name="args">Compatible source generator lifecycle method
+      /// names or the types of PowerUps.</param>
+      internal SuperNodeAttribute(params object[] args) => Args = args;
     }
     """;
 
