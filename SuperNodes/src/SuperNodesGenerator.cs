@@ -844,7 +844,6 @@ public partial class SuperNodesGenerator
     tree = tree.WithRootAndOptions(root, tree.Options);
 
     var powerUpRewriter = new PowerUpRewriter(
-      log: _log,
       typeParameters: typeParameterSubstitutions.ToImmutableDictionary(),
       powerUpClassName: powerUp.Name,
       superNodeClassName: node.Name
