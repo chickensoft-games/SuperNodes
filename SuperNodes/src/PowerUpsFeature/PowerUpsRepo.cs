@@ -31,11 +31,13 @@ public interface IPowerUpsRepo {
   /// node candidate provided by the generation context.
   /// context.
   /// </summary>
-  /// <param name="context">Generation context containing a PowerUp syntax node
-  /// candidate.</param>
-  /// <param name="_">Cancellation token (unused).</param>
-  PowerUp GetPowerUpSyntaxCandidate(
-    GeneratorSyntaxContext context, CancellationToken _
+  /// <param name="model">Semantic model.</param>
+  /// <param name="classDeclaration">PowerUp class declaration syntax node.
+  /// </param>
+  /// <returns>A PowerUp model.</returns>
+  PowerUp GetPowerUp(
+    SemanticModel model,
+    ClassDeclarationSyntax classDeclaration
   );
 }
 
@@ -63,12 +65,12 @@ public class PowerUpsRepo : IPowerUpsRepo {
         => attribute.Name.ToString() == Constants.POWER_UP_ATTRIBUTE_NAME
     );
 
-  public PowerUp GetPowerUpSyntaxCandidate(
-    GeneratorSyntaxContext context, CancellationToken _
+  public PowerUp GetPowerUp(
+    SemanticModel model,
+    ClassDeclarationSyntax classDeclaration
   ) {
-    var node = (ClassDeclarationSyntax)context.Node;
+    var node = classDeclaration;
     var name = node.Identifier.Text;
-    var model = context.SemanticModel;
     var symbol = model.GetDeclaredSymbol(node);
     var fullName = symbol?.ToDisplayString(
       SymbolDisplayFormat.FullyQualifiedFormat

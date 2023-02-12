@@ -458,3 +458,5 @@ dotnet_diagnostic.RCS1165.severity = none
 dotnet_diagnostic.CA1716.severity = none
 # Allow nested ternary operators.
 dotnet_diagnostic.RCS1238.severity = none
+# Don't suggest removing files without any code.
+dotnet_diagnostic.RCS1093.severity = none
