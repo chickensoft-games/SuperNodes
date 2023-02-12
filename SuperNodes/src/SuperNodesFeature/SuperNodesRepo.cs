@@ -1,6 +1,4 @@
 namespace SuperNodes.SuperNodesFeature;
-
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -9,6 +7,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
+using SuperNodes.SuperNodesFeature.Models;
+using SuperNodes.SuperNodesFeature.Services;
 
 /// <summary>
 /// Handles logic for generating SuperNodes.
@@ -45,13 +45,20 @@ public interface ISuperNodesRepo {
 /// </summary>
 public class SuperNodesRepo : ISuperNodesRepo {
   public ICodeService CodeService { get; }
+  public ISuperNodesCodeService SuperNodesCodeService { get; }
 
   /// <summary>
   /// Create a new PowerUpsRepo.
   /// </summary>
-  /// <param name="syntaxOps">Common operations needed for syntax nodes.</param>
-  public SuperNodesRepo(ICodeService syntaxOps) {
-    CodeService = syntaxOps;
+  /// <param name="codeService">Common code operations for syntax nodes and
+  /// semantic model symbols.</param>
+  /// <param name="superNodesCodeService">SuperNodes code service.</param>
+  public SuperNodesRepo(
+    ICodeService codeService,
+    ISuperNodesCodeService superNodesCodeService
+  ) {
+    CodeService = codeService;
+    SuperNodesCodeService = superNodesCodeService;
   }
 
   public bool IsSuperNodeSyntaxCandidate(
@@ -77,7 +84,7 @@ public class SuperNodesRepo : ISuperNodesRepo {
 
     var baseClasses = symbol is null
         ? ImmutableArray<string>.Empty
-        : CodeService.GetBaseClassHierarchy(symbol).ToImmutableArray();
+        : CodeService.GetBaseClassHierarchy(symbol);
 
     // Make sure the SuperNode declares the following method:
     // `public override partial void _Notification(long what);`
@@ -104,54 +111,16 @@ public class SuperNodesRepo : ISuperNodesRepo {
     );
 
     // Find the [SuperNode] attribute on the class.
-    var lifecycleHooks = new List<IGodotNodeLifecycleHook>();
-    var powerUpHooksByFullName = new Dictionary<string, PowerUpHook>();
-
     var attributes
       = symbol?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
     var superNodeAttribute = attributes.FirstOrDefault(
-      attribute =>
-        attribute.AttributeClass?.Name == Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL
+      attribute => attribute.AttributeClass?.Name ==
+          Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL
     );
 
-    if (superNodeAttribute is AttributeData attribute) {
-      var args = attribute.ConstructorArguments;
-      if (args.Length == 1) {
-        // SuperNode attribute technically only requires 1 argument which
-        // should be an array of strings.
-        var arg = args[0];
-        foreach (var constant in arg.Values) {
-          var constantType = constant.Type;
-          if (constantType?.Name == "String") {
-            // Found a lifecycle method. This can be the name of a method
-            // to call from another generator or a method from a PowerUp.
-            var stringValue = (string)constant.Value!;
-            lifecycleHooks.Add(new LifecycleMethodHook(stringValue));
-          }
-          else if (constantType?.Name == "Type") {
-            // We found a typeof(SomePowerUp<a, b, ...>) expression. It may
-            // or may not have generic args. The important part is that we know
-            // this must be a specific PowerUp (possibly with generics) that
-            // needs to be applied to the node script.
-            var typeValue = (INamedTypeSymbol)constant.Value!;
-            // convert from PowerUp<bool, string> to the less concrete type
-            // parameters like PowerUp<TA, TB>.
-            var typeWithGenericParams = typeValue.ConstructedFrom;
-            var fullName = typeWithGenericParams.ToDisplayString(
-              SymbolDisplayFormat.FullyQualifiedFormat
-            );
-            var powerUpHook = new PowerUpHook(
-              fullName,
-              typeValue.TypeArguments.Select(arg => arg.ToDisplayString(
-                SymbolDisplayFormat.FullyQualifiedFormat
-              )).ToImmutableArray()
-            );
-            lifecycleHooks.Add(powerUpHook);
-            powerUpHooksByFullName[fullName] = powerUpHook;
-          }
-        }
-      }
-    }
+    var lifecycleHooksResponse = superNodeAttribute is not null
+      ? SuperNodesCodeService.GetLifecycleHooks(superNodeAttribute)
+      : LifecycleHooksResponse.Empty;
 
     // skipSuperNodeAttribute:
 
@@ -164,11 +133,7 @@ public class SuperNodesRepo : ISuperNodesRepo {
     .Select(method => method.Identifier.Text)
     .ToList();
 
-    var members = symbol is not null
-      ? symbol.GetMembers()
-      : new ImmutableArray<ISymbol>();
-
-    var propsAndFields = CodeService.GetPropsAndFields(members);
+    var members = symbol?.GetMembers() ?? new ImmutableArray<ISymbol>();
 
     var usings = symbol is not null
       ? CodeService.GetUsings(symbol)
@@ -179,12 +144,12 @@ public class SuperNodesRepo : ISuperNodesRepo {
       Name: name,
       Location: classDeclaration.GetLocation(),
       BaseClasses: baseClasses,
-      LifecycleHooks: lifecycleHooks.ToImmutableArray(),
-      PowerUpHooksByFullName: powerUpHooksByFullName.ToImmutableDictionary(),
+      LifecycleHooks: lifecycleHooksResponse.LifecycleHooks,
+      PowerUpHooksByFullName: lifecycleHooksResponse.PowerUpHooksByFullName,
       NotificationHandlers: notificationHandlers.ToImmutableArray(),
       HasPartialNotificationMethod: hasPartialNotificationMethod,
       HasNotificationMethodHandler: hasNotificationMethodHandler,
-      PropsAndFields: propsAndFields,
+      PropsAndFields: CodeService.GetPropsAndFields(members),
       Usings: usings
     );
   }

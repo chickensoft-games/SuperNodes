@@ -1,6 +1,5 @@
 namespace SuperNodes.Common.Services;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -10,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 
 /// <summary>
-/// Contains common code operations for syntax nodes and semantic model symbols.
+/// Common code operations for syntax nodes and semantic model symbols.
 /// </summary>
 public interface ICodeService {
   /// <summary>
@@ -23,6 +22,7 @@ public interface ICodeService {
   /// <returns>The fully resolved containing namespace of the symbol, or the
   /// empty string.</returns>
   string GetContainingNamespace(ISymbol symbol);
+
   /// <summary>
   /// Computes the "using" imports of the syntax tree that the given named type
   /// symbol resides in.
@@ -30,13 +30,14 @@ public interface ICodeService {
   /// <param name="symbol">Named type to inspect.</param>
   /// <returns>String array of "using" imports.</returns>
   ImmutableHashSet<string> GetUsings(INamedTypeSymbol symbol);
+
   /// <summary>
   /// Recursively computes the base classes of a named type symbol.
   /// </summary>
   /// <param name="symbol">Named type to inspect.</param>
   /// <returns>String array of fully qualified base classes, or an empty array
   /// if no base classes.</returns>
-  string[] GetBaseClassHierarchy(INamedTypeSymbol symbol);
+  ImmutableArray<string> GetBaseClassHierarchy(INamedTypeSymbol symbol);
 
   /// <summary>
   /// Computes the list of symbols representing properties or fields based
@@ -50,7 +51,7 @@ public interface ICodeService {
 }
 
 /// <summary>
-/// Contains common code operations for syntax nodes and semantic model symbols.
+/// Common code operations for syntax nodes and semantic model symbols.
 /// </summary>
 public class CodeService : ICodeService {
   public string GetContainingNamespace(ISymbol symbol)
@@ -60,12 +61,12 @@ public class CodeService : ICodeService {
           SymbolDisplayFormat.FullyQualifiedFormat
         ).Replace("global::", "");
 
-  public string[] GetBaseClassHierarchy(INamedTypeSymbol symbol) =>
+  public ImmutableArray<string> GetBaseClassHierarchy(INamedTypeSymbol symbol) =>
   symbol.BaseType is INamedTypeSymbol baseSymbol
     ? new[] {
           baseSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-      }.Concat(GetBaseClassHierarchy(baseSymbol)).ToArray()
-    : Array.Empty<string>();
+      }.Concat(GetBaseClassHierarchy(baseSymbol)).ToImmutableArray()
+    : ImmutableArray<string>.Empty;
 
   public ImmutableHashSet<string> GetUsings(INamedTypeSymbol symbol) {
     var allUsings = SyntaxFactory.List<UsingDirectiveSyntax>();

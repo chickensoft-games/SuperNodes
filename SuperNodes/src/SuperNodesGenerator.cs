@@ -13,12 +13,14 @@ using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
 using SuperNodes.PowerUpsFeature;
 using SuperNodes.SuperNodesFeature;
+using SuperNodes.SuperNodesFeature.Services;
 
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
   public IPowerUpsRepo PowerUpsRepo { get; }
   public ISuperNodesRepo SuperNodesRepo { get; }
+  public ISuperNodesCodeService SuperNodesCodeService { get; }
   public ICodeService CodeService { get; }
 
   private static Log Log { get; } = new Log();
@@ -30,24 +32,28 @@ public partial class SuperNodesGenerator
   public SuperNodesGenerator() {
     CodeService = new CodeService();
     PowerUpsRepo = new PowerUpsRepo(CodeService);
-    SuperNodesRepo = new SuperNodesRepo(CodeService);
+    SuperNodesCodeService = new SuperNodesCodeService();
+    SuperNodesRepo = new SuperNodesRepo(CodeService, SuperNodesCodeService);
   }
 
   /// <summary>
   /// Constructor used for testing.
   /// </summary>
-  /// <param name="codeService">Contains common code operations for syntax
-  /// nodes and semantic model symbols.</param>
+  /// <param name="codeService">Common code operations for syntax nodes and
+  /// semantic model symbols.</param>
   /// <param name="powerUpsRepo">PowerUps repository to use.</param>
   /// <param name="superNodesRepo">SuperNodes repository to use.</param>
+  /// <param name="superNodesCodeService">SuperNodes code service.</param>
   public SuperNodesGenerator(
     ICodeService codeService,
     IPowerUpsRepo powerUpsRepo,
-    ISuperNodesRepo superNodesRepo
+    ISuperNodesRepo superNodesRepo,
+    ISuperNodesCodeService superNodesCodeService
   ) {
     CodeService = codeService;
     PowerUpsRepo = powerUpsRepo;
     SuperNodesRepo = superNodesRepo;
+    SuperNodesCodeService = superNodesCodeService;
   }
 
   public static readonly ImmutableHashSet<string>

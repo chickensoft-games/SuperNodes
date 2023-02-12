@@ -50,9 +50,10 @@ public class PowerUpsRepo : IPowerUpsRepo {
   /// <summary>
   /// Create a new PowerUpsRepo.
   /// </summary>
-  /// <param name="syntaxOps">Common operations needed for syntax nodes.</param>
-  public PowerUpsRepo(ICodeService syntaxOps) {
-    CodeService = syntaxOps;
+  /// <param name="codeService">Common code operations for syntax nodes and
+  /// semantic model symbols.</param>
+  public PowerUpsRepo(ICodeService codeService) {
+    CodeService = codeService;
   }
 
   public bool IsPowerUpSyntaxCandidate(
@@ -126,9 +127,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
         && method.Identifier.Text == $"On{name}"
     );
 
-    var members = symbol is not null
-      ? symbol.GetMembers()
-      : new ImmutableArray<ISymbol>();
+    var members = symbol?.GetMembers() ?? new ImmutableArray<ISymbol>();
 
     return new PowerUp(
       Namespace: @namespace,
