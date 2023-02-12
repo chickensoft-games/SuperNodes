@@ -1,5 +1,6 @@
 namespace SuperNodes.Tests;
 using Shouldly;
+using SuperNodes.Common.Services;
 using Xunit;
 
 public class LogTest {

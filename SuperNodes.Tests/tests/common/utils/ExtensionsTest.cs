@@ -1,7 +1,8 @@
-namespace SuperNodes.Tests;
+namespace SuperNodes.Tests.Common.Utils;
 
 using System;
 using Shouldly;
+using SuperNodes.Common.Utils;
 using Xunit;
 
 public class ExtensionsTest {

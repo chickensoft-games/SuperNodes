@@ -1,4 +1,4 @@
-namespace SuperNodes;
+namespace SuperNodes.Common.Services;
 
 using System.Collections.Generic;
 

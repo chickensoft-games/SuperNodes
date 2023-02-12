@@ -1,4 +1,4 @@
-namespace SuperNodes;
+namespace SuperNodes.Common.Utils;
 
 using System;
 using System.Text;

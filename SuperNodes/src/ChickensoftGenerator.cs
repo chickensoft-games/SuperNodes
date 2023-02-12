@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using SuperNodes.Common.Utils;
 
 public abstract class ChickensoftGenerator {
   /// <summary>Spaces per tab. Adjust to your generator's liking.</summary>
