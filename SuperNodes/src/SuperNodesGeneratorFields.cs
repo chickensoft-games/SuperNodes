@@ -4,9 +4,22 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 
 public partial class SuperNodesGenerator {
+  /// <summary>
+  /// Represents the void return type for a lifecycle method.
+  /// </summary>
   public const string VOID = "void";
+
+  /// <summary>
+  /// Creates an immutable array of arguments for a lifecycle method. A
+  /// convenience method to avoid having to create an array literal every time.
+  /// </summary>
+  /// <param name="args">Lifecycle method arguments.</param>
   public static ImmutableArray<string> Args(params string[] args)
     => args.ToImmutableArray();
+
+  /// <summary>
+  /// Represents the lack of arguments for a lifecycle method.
+  /// </summary>
   public static readonly ImmutableArray<string> NoArgs
     = ImmutableArray<string>.Empty;
 
