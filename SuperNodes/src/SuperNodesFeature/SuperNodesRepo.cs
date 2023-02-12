@@ -119,11 +119,12 @@ public class SuperNodesRepo : ISuperNodesRepo {
     // skipSuperNodeAttribute:
 
     // Find any On[Notification] method handlers.
-    var notificationHandlers = classDeclaration.Members.Where(
-      member => member is MethodDeclarationSyntax method
-        && Constants.LifecycleMethods.ContainsKey(method.Identifier.Text)
+    var notificationHandlers = classDeclaration.Members
+      .OfType<MethodDeclarationSyntax>().Where(
+      member => Constants.LifecycleMethods.ContainsKey(
+        member.Identifier.ValueText
+      )
     )
-    .Cast<MethodDeclarationSyntax>()
     .Select(method => method.Identifier.Text)
     .ToList();
 
