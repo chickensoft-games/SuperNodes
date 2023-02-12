@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
@@ -30,13 +29,14 @@ public interface ISuperNodesRepo {
   /// Returns a model that represents a SuperNode based on the SuperNode syntax
   /// node candidate provided by the generation context.
   /// </summary>
-  /// <param name="model">Semantic model.</param>
   /// <param name="classDeclaration">SuperNode class declaration syntax node.
   /// </param>
+  /// <param name="symbol">Named type symbol representing the class declaration
+  /// syntax node, if any.</param>
   /// <returns>A SuperNode model.</returns>
   SuperNode GetSuperNode(
-    SemanticModel model,
-    ClassDeclarationSyntax classDeclaration
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
   );
 }
 
@@ -72,10 +72,10 @@ public class SuperNodesRepo : ISuperNodesRepo {
     );
 
   public SuperNode GetSuperNode(
-    SemanticModel model,
-    ClassDeclarationSyntax classDeclaration
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
   ) {
-    var symbol = model.GetDeclaredSymbol(classDeclaration);
+    // var symbol = model.GetDeclaredSymbol(classDeclaration);
 
     var name = symbol?.Name ?? classDeclaration.Identifier.ValueText;
     var @namespace = symbol is not null

@@ -5,7 +5,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
@@ -31,13 +30,14 @@ public interface IPowerUpsRepo {
   /// node candidate provided by the generation context.
   /// context.
   /// </summary>
-  /// <param name="model">Semantic model.</param>
   /// <param name="classDeclaration">PowerUp class declaration syntax node.
   /// </param>
+  /// <param name="symbol">Named type symbol representing the class declaration
+  /// syntax node, if any.</param>
   /// <returns>A PowerUp model.</returns>
   PowerUp GetPowerUp(
-    SemanticModel model,
-    ClassDeclarationSyntax classDeclaration
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
   );
 }
 
@@ -67,12 +67,12 @@ public class PowerUpsRepo : IPowerUpsRepo {
     );
 
   public PowerUp GetPowerUp(
-    SemanticModel model,
-    ClassDeclarationSyntax classDeclaration
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
   ) {
     var node = classDeclaration;
     var name = node.Identifier.Text;
-    var symbol = model.GetDeclaredSymbol(node);
+
     var fullName = symbol?.ToDisplayString(
       SymbolDisplayFormat.FullyQualifiedFormat
     ) ?? name;

@@ -98,22 +98,26 @@ public partial class SuperNodesGenerator
       )
     );
 
-    var godotNodeCandidates = context.SyntaxProvider.CreateSyntaxProvider(
+    var superNodeCandidates = context.SyntaxProvider.CreateSyntaxProvider(
       predicate: SuperNodesRepo.IsSuperNodeSyntaxCandidate,
-      transform: (GeneratorSyntaxContext context, CancellationToken _) =>
-        SuperNodesRepo.GetSuperNode(
-          context.SemanticModel,
-          (ClassDeclarationSyntax)context.Node
-        )
+      transform: (GeneratorSyntaxContext context, CancellationToken _) => {
+        var classDeclaration = (ClassDeclarationSyntax)context.Node;
+        return SuperNodesRepo.GetSuperNode(
+          classDeclaration,
+          context.SemanticModel.GetDeclaredSymbol(classDeclaration)
+        );
+      }
     );
 
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
       predicate: PowerUpsRepo.IsPowerUpSyntaxCandidate,
-      transform: (GeneratorSyntaxContext context, CancellationToken _) =>
-        PowerUpsRepo.GetPowerUp(
-          context.SemanticModel,
-          (ClassDeclarationSyntax)context.Node
-        )
+      transform: (GeneratorSyntaxContext context, CancellationToken _) => {
+        var classDeclaration = (ClassDeclarationSyntax)context.Node;
+        return PowerUpsRepo.GetPowerUp(
+          classDeclaration,
+          context.SemanticModel.GetDeclaredSymbol(classDeclaration)
+        );
+      }
     );
 
     // Combine each godot node candidate with the list of power ups and the
@@ -123,7 +127,7 @@ public partial class SuperNodesGenerator
     // among other things), but it allows for performance (supposedly, if
     // you use cache-friendly values). I'm not really sure how cache-friendly
     // this generator is yet, but we'll get there.
-    var generationItems = godotNodeCandidates
+    var generationItems = superNodeCandidates
       .Combine(
         powerUpCandidates.Collect().Select(
           (s, _) => s.ToImmutableDictionary(
