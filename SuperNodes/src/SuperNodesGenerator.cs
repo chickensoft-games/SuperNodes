@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
-using SuperNodes.PowerUps;
+using SuperNodes.PowerUp;
 
 [Generator]
 public partial class SuperNodesGenerator
@@ -158,14 +158,14 @@ public partial class SuperNodesGenerator
       attribute => attribute.Name.ToString() == Constants.SUPER_NODE_ATTRIBUTE_NAME
     );
 
-  public SuperNode GetSuperNodeSyntaxCandidate(
+  public Common.Models.SuperNode GetSuperNodeSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) => GetGodotNode(
     context.SemanticModel,
     (ClassDeclarationSyntax)context.Node
   );
 
-  public SuperNode GetGodotNode(
+  public Common.Models.SuperNode GetGodotNode(
     SemanticModel model,
     ClassDeclarationSyntax classDeclaration
   ) {
@@ -278,7 +278,7 @@ public partial class SuperNodesGenerator
       ? CodeService.GetUsings(symbol)
       : ImmutableHashSet<string>.Empty;
 
-    return new SuperNode(
+    return new Common.Models.SuperNode(
       Namespace: @namespace,
       Name: name,
       Location: classDeclaration.GetLocation(),
@@ -325,7 +325,7 @@ public partial class SuperNodesGenerator
     );
 
     var powerUps = item.PowerUps;
-    var appliedPowerUps = new List<PowerUp>();
+    var appliedPowerUps = new List<Common.Models.PowerUp>();
 
     // See if the node has any power-ups.
     foreach (var lifecycleHook in node.LifecycleHooks) {
@@ -463,7 +463,7 @@ public partial class SuperNodesGenerator
   }
 
   public static string GenerateSuperNodeStatic(
-    GenerationItem item, IList<PowerUp> appliedPowerUps
+    GenerationItem item, IList<Common.Models.PowerUp> appliedPowerUps
   ) {
     var node = item.Node;
 
@@ -603,7 +603,7 @@ public partial class SuperNodesGenerator
   }
 
   public static string GeneratePowerUpImplementation(
-    SuperNode node, PowerUp powerUp
+    Common.Models.SuperNode node, Common.Models.PowerUp powerUp
   ) {
     // Edit the pieces of the user's power-up needed to make it suitable to be
     // a partial class of the specific node script it's applied to.

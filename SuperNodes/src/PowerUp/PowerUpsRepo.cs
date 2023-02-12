@@ -1,4 +1,4 @@
-namespace SuperNodes.PowerUps;
+namespace SuperNodes.PowerUp;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;

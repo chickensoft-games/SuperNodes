@@ -1,4 +1,4 @@
-namespace SuperNodes.SuperNodes;
+namespace SuperNodes.SuperNode;
 
 /// <summary>
 /// Handles logic for generating SuperNodes.

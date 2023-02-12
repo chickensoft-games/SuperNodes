@@ -1,4 +1,4 @@
-namespace SuperNodes.PowerUps;
+namespace SuperNodes.PowerUp;
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
