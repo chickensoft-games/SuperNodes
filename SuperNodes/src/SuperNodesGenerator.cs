@@ -207,7 +207,7 @@ public readonly record struct LifecycleMethod(
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
-  private static Log _log { get; } = new Log();
+  private static Log Log { get; } = new Log();
   private static bool _logsFlushed;
 
   public static readonly ImmutableHashSet<string>
@@ -224,9 +224,9 @@ public partial class SuperNodesGenerator
     // Debugger.Launch();
 
     _logsFlushed = false;
-    _log.Clear();
-    _log.Print("Initializing source generation...");
-    _log.Print("Injecting attributes");
+    Log.Clear();
+    Log.Print("Initializing source generation...");
+    Log.Print("Injecting attributes");
 
     // Inject attributes and other utility sources.
     context.RegisterPostInitializationOutput(
@@ -253,8 +253,8 @@ public partial class SuperNodesGenerator
     );
 
     var godotNodeCandidates = context.SyntaxProvider.CreateSyntaxProvider(
-      predicate: IsGodotNodeSyntaxCandidate,
-      transform: GetGodotNodeSyntaxCandidate
+      predicate: IsSuperNodeSyntaxCandidate,
+      transform: GetSuperNodeSyntaxCandidate
     );
 
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
@@ -300,7 +300,7 @@ public partial class SuperNodesGenerator
       (ctx, _) => {
         if (_logsFlushed) { return; }
         ctx.AddSource(
-          "LOG", SourceText.From(_log.Contents, Encoding.UTF8)
+          "LOG", SourceText.From(Log.Contents, Encoding.UTF8)
         );
         _logsFlushed = true;
       }
@@ -378,7 +378,7 @@ public partial class SuperNodesGenerator
       ? symbol.GetMembers()
       : new ImmutableArray<ISymbol>();
 
-    _log.Print("Registering power up " + fullName);
+    Log.Print("Registering power up " + fullName);
 
     return new PowerUpDescription(
       Namespace: @namespace,
@@ -395,17 +395,24 @@ public partial class SuperNodesGenerator
     );
   }
 
-  public static bool IsGodotNodeSyntaxCandidate(
+  /// <summary>
+  /// Determines whether or not a syntax node is a SuperNode.
+  /// </summary>
+  /// <param name="node">Syntax node to check.</param>
+  /// <param name="_">Cancellation token (unused).</param>
+  /// <returns>True if the syntax node is a class declaration with a SuperNode
+  /// attribute.</returns>
+  public static bool IsSuperNodeSyntaxCandidate(
     SyntaxNode node, CancellationToken _
-  ) => node is ClassDeclarationSyntax classDeclaration &&
-    classDeclaration.AttributeLists.SelectMany(
-      list => list.Attributes
-    ).Any(
-      // Returns true for classes that have a partial method for _Notification
+  ) =>
+    node is ClassDeclarationSyntax classDeclaration &&
+      classDeclaration.AttributeLists.SelectMany(
+        list => list.Attributes
+      ).Any(
       attribute => attribute.Name.ToString() == SUPER_NODE_ATTRIBUTE_NAME
     );
 
-  public static SuperNode GetGodotNodeSyntaxCandidate(
+  public static SuperNode GetSuperNodeSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) => GetGodotNode(
     context.SemanticModel,
@@ -462,7 +469,7 @@ public partial class SuperNodesGenerator
 
     if (superNodeAttribute is AttributeData attribute) {
       var args = attribute.ConstructorArguments;
-      _log.Print($"Found attribute {attribute} {args} {args.Length}");
+      Log.Print($"Found attribute {attribute} {args} {args.Length}");
       if (args.Length == 1) {
         // SuperNode attribute technically only requires 1 argument which
         // should be an array of strings.
@@ -473,7 +480,7 @@ public partial class SuperNodesGenerator
             // Found a lifecycle method. This can be the name of a method
             // to call from another generator or a method from a PowerUp.
             var stringValue = (string)constant.Value!;
-            _log.Print("found lifecycle method " + stringValue);
+            Log.Print("found lifecycle method " + stringValue);
             lifecycleHooks.Add(new LifecycleMethodHook(stringValue));
           }
           else if (constantType?.Name == "Type") {
@@ -488,7 +495,7 @@ public partial class SuperNodesGenerator
             var fullName = typeWithGenericParams.ToDisplayString(
               SymbolDisplayFormat.FullyQualifiedFormat
             );
-            _log.Print("found applied power up " + fullName);
+            Log.Print("found applied power up " + fullName);
             var powerUpHook = new PowerUpHook(
               fullName,
               typeValue.TypeArguments.Select(arg => arg.ToDisplayString(
@@ -1049,7 +1056,7 @@ public partial class SuperNodesGenerator
   /// </summary>
   /// <param name="symbol">A potential symbol whose containing namespace
   /// should be determined.</param>
-  /// <returns>The fully resolved containing namespace of the sybmol, or the
+  /// <returns>The fully resolved containing namespace of the symbol, or the
   /// empty string.</returns>
   internal static string GetContainingNamespace(ISymbol? symbol)
     => symbol?.ContainingNamespace.IsGlobalNamespace != false

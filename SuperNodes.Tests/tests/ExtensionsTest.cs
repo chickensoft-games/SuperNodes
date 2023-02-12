@@ -9,7 +9,7 @@ public class ExtensionsTest {
   public void ReplaceLineEndingsTests() {
     ReplaceLineEndings("").ShouldBe("");
     ReplaceLineEndings("One Two Three").ShouldBe("One Two Three");
-    if (System.Environment.NewLine == "\r\n") {
+    if (Environment.NewLine == "\r\n") {
       ReplaceLineEndings("\n").ShouldBe("\r\n");
       ReplaceLineEndings("\r\n").ShouldBe("\r\n");
     }
@@ -19,6 +19,6 @@ public class ExtensionsTest {
     }
   }
 
-  private string ReplaceLineEndings(string str)
+  private static string ReplaceLineEndings(string str)
     => Extensions.ReplaceLineEndings(str, Environment.NewLine);
 }

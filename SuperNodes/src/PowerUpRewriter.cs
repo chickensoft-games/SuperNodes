@@ -34,34 +34,29 @@ public class PowerUpRewriter : CSharpSyntaxRewriter {
     SuperNodeClassName = superNodeClassName;
   }
 
-  public override SyntaxNode? VisitGenericName(GenericNameSyntax node) {
-    if (node.Identifier.ValueText == PowerUpClassName) {
-      return SyntaxFactory
+  public override SyntaxNode? VisitGenericName(GenericNameSyntax node)
+    => node.Identifier.ValueText == PowerUpClassName
+      ? SyntaxFactory
         .IdentifierName(SyntaxFactory.Identifier(SuperNodeClassName))
-        .WithTriviaFrom(node);
-    }
+        .WithTriviaFrom(node)
+      : base.VisitGenericName(node);
 
-    return base.VisitGenericName(node);
-  }
-
-  public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) {
-    // Rewrite any and all identifiers that match the type parameters we know
-    // about with their corresponding argument.
-    //
-    // As long as power-ups don't have conflicting identifiers (e.g., a variable
-    // named "T" and a type parameter named "T"), this should be fine.
-    if (TypeParameters.TryGetValue(node.Identifier.Text, out var replacement)) {
-      return SyntaxFactory
+  /// <summary>
+  /// Rewrite any and all identifiers that match the type parameters we know
+  /// about with their corresponding argument.
+  /// <br />
+  /// As long as power-ups don't have conflicting identifiers (e.g., a variable
+  /// named "T" and a type parameter named "T"), this should be fine.
+  /// </summary>
+  /// <param name="node">Identifier name syntax node.</param>
+  public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
+    TypeParameters.TryGetValue(node.Identifier.Text, out var replacement)
+      ? SyntaxFactory
         .IdentifierName(SyntaxFactory.Identifier(replacement))
-        .WithTriviaFrom(node);
-    }
-
-    if (node.Identifier.ValueText == PowerUpClassName) {
-      return SyntaxFactory
+        .WithTriviaFrom(node)
+      : node.Identifier.ValueText == PowerUpClassName
+      ? SyntaxFactory
         .IdentifierName(SyntaxFactory.Identifier(SuperNodeClassName))
-        .WithTriviaFrom(node);
-    }
-
-    return base.VisitIdentifierName(node);
-  }
+        .WithTriviaFrom(node)
+      : base.VisitIdentifierName(node);
 }

@@ -77,10 +77,7 @@ public abstract class ChickensoftGenerator {
   /// true, <paramref name="fallback" /> otherwise.</returns>
   public static string If(
     bool condition, string code, string fallback = ""
-  ) {
-    if (condition) { return code; }
-    return fallback;
-  }
+  ) => condition ? code : fallback;
 
   /// <summary>
   /// Recursively computes the base classes of a named type symbol.
