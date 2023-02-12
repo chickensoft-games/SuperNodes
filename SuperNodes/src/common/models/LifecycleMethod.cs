@@ -1,4 +1,4 @@
-namespace SuperNodes.Models;
+namespace SuperNodes.Common.Models;
 
 using System.Collections.Immutable;
 

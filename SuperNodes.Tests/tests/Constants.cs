@@ -3,7 +3,7 @@ namespace SuperNodes.Tests;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Shouldly;
-using SuperNodes.Models;
+using SuperNodes.Common.Models;
 using Xunit;
 
 public class ConstantsTest {

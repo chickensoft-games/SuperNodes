@@ -1,12 +1,9 @@
 namespace SuperNodes;
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 public abstract class ChickensoftGenerator {
   /// <summary>Spaces per tab. Adjust to your generator's liking.</summary>
@@ -78,40 +75,4 @@ public abstract class ChickensoftGenerator {
   public static string If(
     bool condition, string code, string fallback = ""
   ) => condition ? code : fallback;
-
-  /// <summary>
-  /// Recursively computes the base classes of a named type symbol.
-  /// </summary>
-  /// <param name="symbol">Named type to inspect.</param>
-  /// <returns>String array of fully qualified base classes, or an empty array
-  /// if no base classes.</returns>
-  public static string[] GetBaseClassHierarchy(INamedTypeSymbol symbol) =>
-  symbol.BaseType is INamedTypeSymbol baseSymbol
-    ? new[] {
-          baseSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-      }.Concat(GetBaseClassHierarchy(baseSymbol)).ToArray()
-    : Array.Empty<string>();
-
-  /// <summary>
-  /// Computes the "using" imports of the syntax tree that the given named type
-  /// symbol resides in.
-  /// </summary>
-  /// <param name="symbol">Named type to inspect.</param>
-  /// <returns>String array of "using" imports.</returns>
-  public static ImmutableHashSet<string> GetUsings(INamedTypeSymbol symbol) {
-    var allUsings = SyntaxFactory.List<UsingDirectiveSyntax>();
-    foreach (var syntaxRef in symbol.DeclaringSyntaxReferences) {
-      foreach (var parent in syntaxRef.GetSyntax().Ancestors(false)) {
-        if (parent is BaseNamespaceDeclarationSyntax ns) {
-          allUsings = allUsings.AddRange(ns.Usings);
-        }
-        else if (parent is CompilationUnitSyntax comp) {
-          allUsings = allUsings.AddRange(comp.Usings);
-        }
-      }
-    }
-    return allUsings
-      .Select(@using => @using.Name.ToString())
-      .ToImmutableHashSet();
-  }
 }

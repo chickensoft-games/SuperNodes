@@ -2,7 +2,7 @@ namespace SuperNodes;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using SuperNodes.Models;
+using SuperNodes.Common.Models;
 
 public class Constants {
   /// <summary>

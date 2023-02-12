@@ -1,4 +1,4 @@
-namespace SuperNodes.Models;
+namespace SuperNodes.Common.Models;
 
 /// <summary>
 /// Description of an attribute applied to a class field or property member.

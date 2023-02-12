@@ -9,13 +9,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using SuperNodes.Models;
-using SuperNodes.Repositories;
+using SuperNodes.Common.Models;
+using SuperNodes.Common.Services;
+using SuperNodes.PowerUps;
 
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
   public IPowerUpsRepo PowerUpsRepo { get; }
+  public ICodeService CodeService { get; }
 
   private static Log Log { get; } = new Log();
   private static bool _logsFlushed;
@@ -24,14 +26,20 @@ public partial class SuperNodesGenerator
   /// Parameterless constructor used by the .NET SDK tooling.
   /// </summary>
   public SuperNodesGenerator() {
-    PowerUpsRepo = new PowerUpsRepo();
+    CodeService = new CodeService();
+    PowerUpsRepo = new PowerUpsRepo(CodeService);
   }
 
   /// <summary>
   /// Constructor used for testing.
   /// </summary>
+  /// <param name="syntaxOps">Common operations needed for syntax nodes.</param>
   /// <param name="powerUpsRepo">Power ups repository to use.</param>
-  public SuperNodesGenerator(IPowerUpsRepo powerUpsRepo) {
+  public SuperNodesGenerator(
+    ICodeService syntaxOps,
+   IPowerUpsRepo powerUpsRepo
+   ) {
+    CodeService = syntaxOps;
     PowerUpsRepo = powerUpsRepo;
   }
 
@@ -84,7 +92,7 @@ public partial class SuperNodesGenerator
 
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
       predicate: PowerUpsRepo.IsPowerUpSyntaxCandidate,
-      transform: GetPowerUpSyntaxCandidate
+      transform: PowerUpsRepo.GetPowerUpSyntaxCandidate
     );
 
     // Combine each godot node candidate with the list of power ups and the
@@ -133,86 +141,6 @@ public partial class SuperNodesGenerator
 #endif
   }
 
-  public static PowerUp GetPowerUpSyntaxCandidate(
-    GeneratorSyntaxContext context, CancellationToken _
-  ) {
-    var node = (ClassDeclarationSyntax)context.Node;
-    var name = node.Identifier.Text;
-    var model = context.SemanticModel;
-    var symbol = model.GetDeclaredSymbol(node);
-    var fullName = symbol?.ToDisplayString(
-      SymbolDisplayFormat.FullyQualifiedFormat
-    ) ?? name;
-    var baseType = symbol?.BaseType?.ToDisplayString(
-      SymbolDisplayFormat.FullyQualifiedFormat
-    );
-    var baseClass = baseType ?? "global::Godot.Node";
-
-    var typeParameters = node.TypeParameterList?.Parameters
-      .Select(parameter => parameter.Identifier.Text)
-      .ToImmutableArray() ?? ImmutableArray<string>.Empty;
-
-    // get only the interfaces shown in the power-up's source code
-    var plainInterfaces = (
-      node.BaseList?.Types
-      .Where(type => type.Type is IdentifierNameSyntax)
-      .Select(type => (type.Type as IdentifierNameSyntax)!.Identifier.Text)
-      .ToImmutableHashSet()
-    ) ?? new HashSet<string>().ToImmutableHashSet();
-
-    var genericInterfaces = (
-      node.BaseList?.Types
-      .Where(type => type.Type is GenericNameSyntax)
-      .Select(type => (type.Type as GenericNameSyntax)!.Identifier.Text)
-      .ToImmutableHashSet()
-    ) ?? new HashSet<string>().ToImmutableHashSet();
-
-    var powerUpInterfaces = plainInterfaces.Union(genericInterfaces);
-
-    var allInterfaces = symbol?.AllInterfaces ??
-      new ImmutableArray<INamedTypeSymbol>();
-
-    var interfaces = allInterfaces
-      .Where(@interface => powerUpInterfaces.Contains(@interface.Name))
-      .Select(
-        @interface => @interface.ToDisplayString(
-          SymbolDisplayFormat.FullyQualifiedFormat
-        )
-      )
-      .ToImmutableArray();
-
-    var @namespace = GetContainingNamespace(symbol);
-
-    var usings = symbol is not null
-      ? GetUsings(symbol)
-      : ImmutableHashSet<string>.Empty;
-
-    var hasOnPowerUpMethod = node.Members.Any(
-      member => member is MethodDeclarationSyntax method
-        && method.Identifier.Text == $"On{name}"
-    );
-
-    var members = symbol is not null
-      ? symbol.GetMembers()
-      : new ImmutableArray<ISymbol>();
-
-    Log.Print("Registering power up " + fullName);
-
-    return new PowerUp(
-      Namespace: @namespace,
-      Name: name,
-      FullName: fullName,
-      Location: node.GetLocation(),
-      BaseClass: baseClass,
-      TypeParameters: typeParameters,
-      Interfaces: interfaces,
-      Source: node.ToString(),
-      PropsAndFields: GetPropsAndFields(members),
-      Usings: usings,
-      HasOnPowerUpMethod: hasOnPowerUpMethod
-    );
-  }
-
   /// <summary>
   /// Determines whether or not a syntax node is a SuperNode.
   /// </summary>
@@ -230,25 +158,27 @@ public partial class SuperNodesGenerator
       attribute => attribute.Name.ToString() == Constants.SUPER_NODE_ATTRIBUTE_NAME
     );
 
-  public static SuperNode GetSuperNodeSyntaxCandidate(
+  public SuperNode GetSuperNodeSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) => GetGodotNode(
     context.SemanticModel,
     (ClassDeclarationSyntax)context.Node
   );
 
-  public static SuperNode GetGodotNode(
+  public SuperNode GetGodotNode(
     SemanticModel model,
     ClassDeclarationSyntax classDeclaration
   ) {
     var symbol = model.GetDeclaredSymbol(classDeclaration);
 
     var name = symbol?.Name ?? classDeclaration.Identifier.ValueText;
-    var @namespace = GetContainingNamespace(symbol);
+    var @namespace = symbol is not null
+      ? CodeService.GetContainingNamespace(symbol)
+      : "";
 
     var baseClasses = symbol is null
         ? ImmutableArray<string>.Empty
-        : GetBaseClassHierarchy(symbol).ToImmutableArray();
+        : CodeService.GetBaseClassHierarchy(symbol).ToImmutableArray();
 
     // Make sure the SuperNode declares the following method:
     // `public override partial void _Notification(long what);`
@@ -342,10 +272,10 @@ public partial class SuperNodesGenerator
       ? symbol.GetMembers()
       : new ImmutableArray<ISymbol>();
 
-    var propsAndFields = GetPropsAndFields(members);
+    var propsAndFields = CodeService.GetPropsAndFields(members);
 
     var usings = symbol is not null
-      ? GetUsings(symbol)
+      ? CodeService.GetUsings(symbol)
       : ImmutableHashSet<string>.Empty;
 
     return new SuperNode(
@@ -812,74 +742,4 @@ public partial class SuperNodesGenerator
     """;
     return Format(code);
   }
-
-  internal static ImmutableArray<PropOrField> GetPropsAndFields(
-    ImmutableArray<ISymbol> members
-  ) {
-    var propsAndFields = new List<PropOrField>();
-
-    foreach (var member in members) {
-      if (
-        (member is not IFieldSymbol and not IPropertySymbol) ||
-        member.IsStatic || !member.CanBeReferencedByName
-      ) {
-        continue;
-      }
-
-      var name = member.Name;
-      var type = "";
-
-      if (member is IPropertySymbol property) {
-        type = property.Type.ToString();
-      }
-      if (member is IFieldSymbol field) {
-        type = field.Type.ToString();
-      }
-
-      var attributes = GetAttributesForPropOrField(member.GetAttributes());
-
-      var propOrField = new PropOrField(
-        Name: name,
-        Type: type,
-        Attributes: attributes,
-        IsField: member is IFieldSymbol
-      );
-
-      propsAndFields.Add(propOrField);
-    }
-
-    return propsAndFields
-      .OrderBy(propOrField => propOrField.Name)
-      .ToImmutableArray();
-  }
-
-  internal static ImmutableHashSet<AttributeDescription>
-    GetAttributesForPropOrField(ImmutableArray<AttributeData> attributes
-  ) => attributes.Select(
-      attribute => new AttributeDescription(
-        Name: attribute.AttributeClass?.Name ?? string.Empty,
-        Type: attribute.AttributeClass?.ToDisplayString(
-          SymbolDisplayFormat.FullyQualifiedFormat
-        ) ?? string.Empty,
-        ArgumentExpressions: attribute.ConstructorArguments.Select(
-          arg => arg.ToCSharpString()
-        ).ToArray()
-      )
-    ).ToImmutableHashSet();
-
-  /// <summary>
-  /// Determines the fully resolved containing namespace of a symbol, if the
-  /// symbol is non-null and has a containing namespace. Otherwise, returns a
-  /// blank string.
-  /// </summary>
-  /// <param name="symbol">A potential symbol whose containing namespace
-  /// should be determined.</param>
-  /// <returns>The fully resolved containing namespace of the symbol, or the
-  /// empty string.</returns>
-  internal static string GetContainingNamespace(ISymbol? symbol)
-    => symbol?.ContainingNamespace.IsGlobalNamespace != false
-      ? string.Empty
-      : symbol.ContainingNamespace.ToDisplayString(
-          SymbolDisplayFormat.FullyQualifiedFormat
-        ).Replace("global::", "");
 }
