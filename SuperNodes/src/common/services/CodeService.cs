@@ -9,6 +9,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 
+/// <summary>
+/// Contains common code operations for syntax nodes and semantic model symbols.
+/// </summary>
 public interface ICodeService {
   /// <summary>
   /// Determines the fully resolved containing namespace of a symbol, if the
@@ -47,7 +50,7 @@ public interface ICodeService {
 }
 
 /// <summary>
-/// Contains common syntax node operations.
+/// Contains common code operations for syntax nodes and semantic model symbols.
 /// </summary>
 public class CodeService : ICodeService {
   public string GetContainingNamespace(ISymbol symbol)

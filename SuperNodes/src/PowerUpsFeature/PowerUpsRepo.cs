@@ -1,4 +1,4 @@
-namespace SuperNodes.PowerUp;
+namespace SuperNodes.PowerUpsFeature;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,6 +10,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
 
+/// <summary>
+/// Handles logic for generating PowerUps.
+/// </summary>
 public interface IPowerUpsRepo {
   /// <summary>Common operations needed for syntax nodes.</summary>
   ICodeService CodeService { get; }

@@ -11,12 +11,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using SuperNodes.Common.Models;
 using SuperNodes.Common.Services;
-using SuperNodes.PowerUp;
+using SuperNodes.PowerUpsFeature;
+using SuperNodes.SuperNodesFeature;
 
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
   public IPowerUpsRepo PowerUpsRepo { get; }
+  public ISuperNodesRepo SuperNodesRepo { get; }
   public ICodeService CodeService { get; }
 
   private static Log Log { get; } = new Log();
@@ -28,19 +30,24 @@ public partial class SuperNodesGenerator
   public SuperNodesGenerator() {
     CodeService = new CodeService();
     PowerUpsRepo = new PowerUpsRepo(CodeService);
+    SuperNodesRepo = new SuperNodesRepo(CodeService);
   }
 
   /// <summary>
   /// Constructor used for testing.
   /// </summary>
-  /// <param name="syntaxOps">Common operations needed for syntax nodes.</param>
-  /// <param name="powerUpsRepo">Power ups repository to use.</param>
+  /// <param name="codeService">Contains common code operations for syntax
+  /// nodes and semantic model symbols.</param>
+  /// <param name="powerUpsRepo">PowerUps repository to use.</param>
+  /// <param name="superNodesRepo">SuperNodes repository to use.</param>
   public SuperNodesGenerator(
-    ICodeService syntaxOps,
-   IPowerUpsRepo powerUpsRepo
-   ) {
-    CodeService = syntaxOps;
+    ICodeService codeService,
+    IPowerUpsRepo powerUpsRepo,
+    ISuperNodesRepo superNodesRepo
+  ) {
+    CodeService = codeService;
     PowerUpsRepo = powerUpsRepo;
+    SuperNodesRepo = superNodesRepo;
   }
 
   public static readonly ImmutableHashSet<string>
@@ -158,14 +165,14 @@ public partial class SuperNodesGenerator
       attribute => attribute.Name.ToString() == Constants.SUPER_NODE_ATTRIBUTE_NAME
     );
 
-  public Common.Models.SuperNode GetSuperNodeSyntaxCandidate(
+  public SuperNode GetSuperNodeSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
   ) => GetGodotNode(
     context.SemanticModel,
     (ClassDeclarationSyntax)context.Node
   );
 
-  public Common.Models.SuperNode GetGodotNode(
+  public SuperNode GetGodotNode(
     SemanticModel model,
     ClassDeclarationSyntax classDeclaration
   ) {
@@ -278,7 +285,7 @@ public partial class SuperNodesGenerator
       ? CodeService.GetUsings(symbol)
       : ImmutableHashSet<string>.Empty;
 
-    return new Common.Models.SuperNode(
+    return new SuperNode(
       Namespace: @namespace,
       Name: name,
       Location: classDeclaration.GetLocation(),
@@ -325,7 +332,7 @@ public partial class SuperNodesGenerator
     );
 
     var powerUps = item.PowerUps;
-    var appliedPowerUps = new List<Common.Models.PowerUp>();
+    var appliedPowerUps = new List<PowerUp>();
 
     // See if the node has any power-ups.
     foreach (var lifecycleHook in node.LifecycleHooks) {
@@ -463,7 +470,7 @@ public partial class SuperNodesGenerator
   }
 
   public static string GenerateSuperNodeStatic(
-    GenerationItem item, IList<Common.Models.PowerUp> appliedPowerUps
+    GenerationItem item, IList<PowerUp> appliedPowerUps
   ) {
     var node = item.Node;
 
@@ -603,7 +610,7 @@ public partial class SuperNodesGenerator
   }
 
   public static string GeneratePowerUpImplementation(
-    Common.Models.SuperNode node, Common.Models.PowerUp powerUp
+    SuperNode node, PowerUp powerUp
   ) {
     // Edit the pieces of the user's power-up needed to make it suitable to be
     // a partial class of the specific node script it's applied to.
