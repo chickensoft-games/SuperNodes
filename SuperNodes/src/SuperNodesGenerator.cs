@@ -560,7 +560,7 @@ public partial class SuperNodesGenerator
       )
     );
 
-    if (interfaces.Length > 0) {
+    if (interfaces.Count > 0) {
       // Add only interfaces back to the base list.
       newClassDeclaration = newClassDeclaration.WithBaseList(
         SyntaxFactory.BaseList(

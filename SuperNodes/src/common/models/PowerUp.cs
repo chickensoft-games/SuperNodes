@@ -49,7 +49,7 @@ public record PowerUp(
   Location Location,
   string BaseClass,
   ImmutableArray<string> TypeParameters,
-  ImmutableArray<string> Interfaces,
+  ImmutableHashSet<string> Interfaces,
   string Source,
   ImmutableArray<PropOrField> PropsAndFields,
   IImmutableSet<string> Usings,

@@ -13,6 +13,42 @@ using SuperNodes.Common.Models;
 /// </summary>
 public interface ICodeService {
   /// <summary>
+  /// Determines the list of visible type parameters shown on a class
+  /// declaration syntax node.
+  /// </summary>
+  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <returns>Visible list of type parameters shown on that particular class
+  /// declaration syntax node.</returns>
+  ImmutableArray<string> GetTypeParameters(
+    ClassDeclarationSyntax classDeclaration
+  );
+
+  /// <summary>
+  /// Determines the list of visible interfaces shown on a class declaration
+  /// syntax node and returns the set of the fully qualified interface names.
+  /// </summary>
+  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <param name="symbol">Named type symbol corresponding to the class
+  /// </param>
+  /// <returns>Visible list of interfaces shown on that particular class
+  /// declaration syntax node.</returns>
+  ImmutableHashSet<string> GetVisibleInterfacesFullyQualified(
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
+  );
+
+  /// <summary>
+  /// Determines the list of visible generic interfaces shown on a class
+  /// declaration syntax node.
+  /// </summary>
+  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <returns>Visible list of generic interfaces shown on that particular class
+  /// declaration syntax node.</returns>
+  ImmutableHashSet<string> GetVisibleGenericInterfaces(
+    ClassDeclarationSyntax classDeclaration
+  );
+
+  /// <summary>
   /// Determines the fully resolved containing namespace of a symbol, if the
   /// symbol is non-null and has a containing namespace. Otherwise, returns a
   /// blank string.
@@ -54,6 +90,67 @@ public interface ICodeService {
 /// Common code operations for syntax nodes and semantic model symbols.
 /// </summary>
 public class CodeService : ICodeService {
+  public ImmutableHashSet<string> GetVisibleInterfacesFullyQualified(
+    ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
+  ) {
+    var nonGenericInterfaces = GetVisibleInterfaces(classDeclaration);
+    var genericInterfaces = GetVisibleGenericInterfaces(classDeclaration);
+    var visibleInterfaces = nonGenericInterfaces.Union(genericInterfaces);
+
+    var allKnownInterfaces = symbol?.AllInterfaces ??
+      ImmutableArray<INamedTypeSymbol>.Empty;
+
+    if (allKnownInterfaces.IsEmpty) {
+      // Symbol doesn't have any information (probably because the code isn't
+      // fully valid while being edited), so just return the non-fully-qualified
+      // names of the interfaces (since that's the best we can do).
+      return visibleInterfaces;
+    }
+
+    // Find the fully qualified names of only the interfaces that are directly
+    // listed on the class declaration syntax node we are given.
+    // allKnownInterfaces is computed based on the semantic model, so it
+    // actually can contain interfaces that may be implemented by other
+    // partial class implementations elsewhere.
+    return allKnownInterfaces
+      .Where(@interface => visibleInterfaces.Contains(@interface.Name))
+      .Select(
+        @interface => @interface.ToDisplayString(
+          SymbolDisplayFormat.FullyQualifiedFormat
+        )
+      )
+      .ToImmutableHashSet();
+  }
+
+  public ImmutableArray<string> GetTypeParameters(
+    ClassDeclarationSyntax classDeclaration
+  ) => (
+    classDeclaration.TypeParameterList?.Parameters
+      .Select(parameter => parameter.Identifier.ValueText)
+      .ToImmutableArray()
+    ) ?? ImmutableArray<string>.Empty;
+
+  public ImmutableHashSet<string> GetVisibleInterfaces(
+    ClassDeclarationSyntax classDeclaration
+  ) => (
+    classDeclaration.BaseList?.Types
+      .Select(type => type.Type)
+      .OfType<IdentifierNameSyntax>()
+      .Select(type => type.Identifier.ValueText)
+      .ToImmutableHashSet()
+    ) ?? ImmutableHashSet<string>.Empty;
+
+  public ImmutableHashSet<string> GetVisibleGenericInterfaces(
+    ClassDeclarationSyntax classDeclaration
+  ) => (
+    classDeclaration.BaseList?.Types
+      .Select(type => type.Type)
+      .OfType<GenericNameSyntax>()
+      .Select(type => type.Identifier.ValueText)
+      .ToImmutableHashSet()
+    ) ?? ImmutableHashSet<string>.Empty;
+
   public string GetContainingNamespace(ISymbol symbol)
     => symbol.ContainingNamespace.IsGlobalNamespace
       ? string.Empty

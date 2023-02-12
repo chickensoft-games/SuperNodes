@@ -1,6 +1,5 @@
 namespace SuperNodes.PowerUpsFeature;
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -75,43 +74,17 @@ public class PowerUpsRepo : IPowerUpsRepo {
     var fullName = symbol?.ToDisplayString(
       SymbolDisplayFormat.FullyQualifiedFormat
     ) ?? name;
+
     var baseType = symbol?.BaseType?.ToDisplayString(
       SymbolDisplayFormat.FullyQualifiedFormat
     );
+
     var baseClass = baseType ?? "global::Godot.Node";
+    var typeParameters = CodeService.GetTypeParameters(classDeclaration);
 
-    var typeParameters = classDeclaration.TypeParameterList?.Parameters
-      .Select(parameter => parameter.Identifier.Text)
-      .ToImmutableArray() ?? ImmutableArray<string>.Empty;
-
-    // get only the interfaces shown in the power-up's source code
-    var plainInterfaces = (
-      classDeclaration.BaseList?.Types
-      .Where(type => type.Type is IdentifierNameSyntax)
-      .Select(type => (type.Type as IdentifierNameSyntax)!.Identifier.Text)
-      .ToImmutableHashSet()
-    ) ?? new HashSet<string>().ToImmutableHashSet();
-
-    var genericInterfaces = (
-      classDeclaration.BaseList?.Types
-      .Where(type => type.Type is GenericNameSyntax)
-      .Select(type => (type.Type as GenericNameSyntax)!.Identifier.Text)
-      .ToImmutableHashSet()
-    ) ?? new HashSet<string>().ToImmutableHashSet();
-
-    var powerUpInterfaces = plainInterfaces.Union(genericInterfaces);
-
-    var allInterfaces = symbol?.AllInterfaces ??
-      new ImmutableArray<INamedTypeSymbol>();
-
-    var interfaces = allInterfaces
-      .Where(@interface => powerUpInterfaces.Contains(@interface.Name))
-      .Select(
-        @interface => @interface.ToDisplayString(
-          SymbolDisplayFormat.FullyQualifiedFormat
-        )
-      )
-      .ToImmutableArray();
+    var interfaces = CodeService.GetVisibleInterfacesFullyQualified(
+      classDeclaration, symbol
+    );
 
     var @namespace = symbol is not null
       ? CodeService.GetContainingNamespace(symbol)
@@ -123,7 +96,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
 
     var hasOnPowerUpMethod = classDeclaration.Members.Any(
       member => member is MethodDeclarationSyntax method
-        && method.Identifier.Text == $"On{name}"
+        && method.Identifier.ValueText == $"On{name}"
     );
 
     var members = symbol?.GetMembers() ?? new ImmutableArray<ISymbol>();
