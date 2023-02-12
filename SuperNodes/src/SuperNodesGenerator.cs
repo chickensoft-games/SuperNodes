@@ -99,7 +99,8 @@ public partial class SuperNodesGenerator
     );
 
     var superNodeCandidates = context.SyntaxProvider.CreateSyntaxProvider(
-      predicate: SuperNodesRepo.IsSuperNodeSyntaxCandidate,
+      predicate: (SyntaxNode node, CancellationToken _)
+        => SuperNodesRepo.IsSuperNodeSyntaxCandidate(node),
       transform: (GeneratorSyntaxContext context, CancellationToken _) => {
         var classDeclaration = (ClassDeclarationSyntax)context.Node;
         return SuperNodesRepo.GetSuperNode(
@@ -110,7 +111,8 @@ public partial class SuperNodesGenerator
     );
 
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
-      predicate: PowerUpsRepo.IsPowerUpSyntaxCandidate,
+      predicate: (SyntaxNode node, CancellationToken _)
+        => PowerUpsRepo.IsPowerUpSyntaxCandidate(node),
       transform: (GeneratorSyntaxContext context, CancellationToken _) => {
         var classDeclaration = (ClassDeclarationSyntax)context.Node;
         return PowerUpsRepo.GetPowerUp(

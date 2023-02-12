@@ -1,7 +1,6 @@
 namespace SuperNodes.SuperNodesFeature;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
@@ -20,10 +19,9 @@ public interface ISuperNodesRepo {
   /// Determines whether or not a syntax node is a SuperNode.
   /// </summary>
   /// <param name="node">Syntax node to check.</param>
-  /// <param name="_">Cancellation token (unused).</param>
   /// <returns>True if the syntax node is a class declaration with a SuperNode
   /// attribute.</returns>
-  bool IsSuperNodeSyntaxCandidate(SyntaxNode node, CancellationToken _);
+  bool IsSuperNodeSyntaxCandidate(SyntaxNode node);
 
   /// <summary>
   /// Returns a model that represents a SuperNode based on the SuperNode syntax
@@ -61,10 +59,8 @@ public class SuperNodesRepo : ISuperNodesRepo {
     SuperNodesCodeService = superNodesCodeService;
   }
 
-  public bool IsSuperNodeSyntaxCandidate(
-    SyntaxNode node, CancellationToken _
-  ) =>
-    node is ClassDeclarationSyntax classDeclaration &&
+  public bool IsSuperNodeSyntaxCandidate(SyntaxNode node)
+    => node is ClassDeclarationSyntax classDeclaration &&
       classDeclaration.AttributeLists.SelectMany(
         list => list.Attributes
       ).Any(
@@ -131,7 +127,7 @@ public class SuperNodesRepo : ISuperNodesRepo {
     .Select(method => method.Identifier.Text)
     .ToList();
 
-    var members = symbol?.GetMembers() ?? new ImmutableArray<ISymbol>();
+    var members = symbol?.GetMembers() ?? ImmutableArray<ISymbol>.Empty;
 
     var usings = symbol is not null
       ? CodeService.GetUsings(symbol)

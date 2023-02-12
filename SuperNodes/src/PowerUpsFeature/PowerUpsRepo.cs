@@ -2,7 +2,6 @@ namespace SuperNodes.PowerUpsFeature;
 
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SuperNodes.Common.Models;
@@ -19,10 +18,9 @@ public interface IPowerUpsRepo {
   /// Determines if the given syntax node is a power up syntax candidate.
   /// </summary>
   /// <param name="node">Syntax node to check.</param>
-  /// <param name="_">Cancellation token (unused).</param>
   /// <returns>True if the syntax node is a class declaration with the
   /// PowerUp attribute.</returns>
-  bool IsPowerUpSyntaxCandidate(SyntaxNode node, CancellationToken _);
+  bool IsPowerUpSyntaxCandidate(SyntaxNode node);
 
   /// <summary>
   /// Returns a model that represents a PowerUp based on the PowerUp syntax
@@ -56,7 +54,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
   }
 
   public bool IsPowerUpSyntaxCandidate(
-    SyntaxNode node, CancellationToken _
+    SyntaxNode node
   ) => node is ClassDeclarationSyntax classDeclaration && classDeclaration
     .AttributeLists
     .SelectMany(list => list.Attributes)
@@ -99,7 +97,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
         && method.Identifier.ValueText == $"On{name}"
     );
 
-    var members = symbol?.GetMembers() ?? new ImmutableArray<ISymbol>();
+    var members = symbol?.GetMembers() ?? ImmutableArray<ISymbol>.Empty;
 
     return new PowerUp(
       Namespace: @namespace,
