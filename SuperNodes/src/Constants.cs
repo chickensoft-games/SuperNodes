@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using SuperNodes.Models;
 
-public partial class SuperNodesGenerator {
+public class Constants {
   /// <summary>
   /// Represents the void return type for a lifecycle method.
   /// </summary>

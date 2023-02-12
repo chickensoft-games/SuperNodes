@@ -10,12 +10,30 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using SuperNodes.Models;
+using SuperNodes.Repositories;
 
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
+  public IPowerUpsRepo PowerUpsRepo { get; }
+
   private static Log Log { get; } = new Log();
   private static bool _logsFlushed;
+
+  /// <summary>
+  /// Parameterless constructor used by the .NET SDK tooling.
+  /// </summary>
+  public SuperNodesGenerator() {
+    PowerUpsRepo = new PowerUpsRepo();
+  }
+
+  /// <summary>
+  /// Constructor used for testing.
+  /// </summary>
+  /// <param name="powerUpsRepo">Power ups repository to use.</param>
+  public SuperNodesGenerator(IPowerUpsRepo powerUpsRepo) {
+    PowerUpsRepo = powerUpsRepo;
+  }
 
   public static readonly ImmutableHashSet<string>
     BlacklistedStaticPowerUpProperties = new HashSet<string> {
@@ -38,23 +56,23 @@ public partial class SuperNodesGenerator
     // Inject attributes and other utility sources.
     context.RegisterPostInitializationOutput(
       (context) => context.AddSource(
-        $"{SUPER_NODE_ATTRIBUTE_NAME_FULL}.g.cs",
-        SourceText.From(Format(SUPER_NODE_ATTRIBUTE_SOURCE), Encoding.UTF8)
+        $"{Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL}.g.cs",
+        SourceText.From(Format(Constants.SUPER_NODE_ATTRIBUTE_SOURCE), Encoding.UTF8)
       )
     );
 
     context.RegisterPostInitializationOutput(
       (context) => context.AddSource(
-        $"{POWER_UP_ATTRIBUTE_NAME_FULL}.g.cs",
-        SourceText.From(Format(POWER_UP_ATTRIBUTE_SOURCE), Encoding.UTF8)
+        $"{Constants.POWER_UP_ATTRIBUTE_NAME_FULL}.g.cs",
+        SourceText.From(Format(Constants.POWER_UP_ATTRIBUTE_SOURCE), Encoding.UTF8)
       )
     );
 
     context.RegisterPostInitializationOutput(
       (context) => context.AddSource(
-        $"{STATIC_REFLECTION_NAME}.g.cs",
+        $"{Constants.STATIC_REFLECTION_NAME}.g.cs",
         SourceText.From(
-          Format(STATIC_REFLECTION_SOURCE), Encoding.UTF8
+          Format(Constants.STATIC_REFLECTION_SOURCE), Encoding.UTF8
         )
       )
     );
@@ -65,7 +83,7 @@ public partial class SuperNodesGenerator
     );
 
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
-      predicate: IsPowerUpSyntaxCandidate,
+      predicate: PowerUpsRepo.IsPowerUpSyntaxCandidate,
       transform: GetPowerUpSyntaxCandidate
     );
 
@@ -114,13 +132,6 @@ public partial class SuperNodesGenerator
     );
 #endif
   }
-
-  public static bool IsPowerUpSyntaxCandidate(
-    SyntaxNode node, CancellationToken _
-  ) => node is ClassDeclarationSyntax classDeclaration && classDeclaration
-    .AttributeLists
-    .SelectMany(list => list.Attributes)
-    .Any(attribute => attribute.Name.ToString() == POWER_UP_ATTRIBUTE_NAME);
 
   public static PowerUp GetPowerUpSyntaxCandidate(
     GeneratorSyntaxContext context, CancellationToken _
@@ -216,7 +227,7 @@ public partial class SuperNodesGenerator
       classDeclaration.AttributeLists.SelectMany(
         list => list.Attributes
       ).Any(
-      attribute => attribute.Name.ToString() == SUPER_NODE_ATTRIBUTE_NAME
+      attribute => attribute.Name.ToString() == Constants.SUPER_NODE_ATTRIBUTE_NAME
     );
 
   public static SuperNode GetSuperNodeSyntaxCandidate(
@@ -271,7 +282,7 @@ public partial class SuperNodesGenerator
       = symbol?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
     var superNodeAttribute = attributes.FirstOrDefault(
       attribute =>
-        attribute.AttributeClass?.Name == SUPER_NODE_ATTRIBUTE_NAME_FULL
+        attribute.AttributeClass?.Name == Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL
     );
 
     if (superNodeAttribute is AttributeData attribute) {
@@ -321,7 +332,7 @@ public partial class SuperNodesGenerator
     // Find any On[Notification] method handlers.
     var notificationHandlers = classDeclaration.Members.Where(
       member => member is MethodDeclarationSyntax method
-        && LifecycleMethods.ContainsKey(method.Identifier.Text)
+        && Constants.LifecycleMethods.ContainsKey(method.Identifier.Text)
     )
     .Cast<MethodDeclarationSyntax>()
     .Select(method => method.Identifier.Text)
@@ -362,7 +373,7 @@ public partial class SuperNodesGenerator
       context.ReportDiagnostic(
         Diagnostic.Create(
           new DiagnosticDescriptor(
-            id: SUPER_NODE_MISSING_NOTIFICATION_METHOD,
+            id: Constants.SUPER_NODE_MISSING_NOTIFICATION_METHOD,
             title: "Missing partial `_Notification` method signature.",
             messageFormat: "The SuperNode '{0}' is missing a partial " +
               "signature for `_Notification(long what)`. Please add the " +
@@ -410,7 +421,7 @@ public partial class SuperNodesGenerator
         context.ReportDiagnostic(
           Diagnostic.Create(
             descriptor: new DiagnosticDescriptor(
-              id: SUPER_NODE_INVALID_POWER_UP,
+              id: Constants.SUPER_NODE_INVALID_POWER_UP,
               title: "Invalid power-up on Godot node script class",
               messageFormat: "Power-up '{0}' cannot be applied to node '{1}' " +
                 "because '{1}' does not extend '{2}'",
@@ -469,7 +480,7 @@ public partial class SuperNodesGenerator
     if (node.NotificationHandlers.Length > 0) {
       handlers.Add("switch (what) {");
       foreach (var handler in node.NotificationHandlers) {
-        var method = LifecycleMethods[handler];
+        var method = Constants.LifecycleMethods[handler];
         handlers.Add(
           $"case {method.GodotNotification}:"
         );
@@ -685,7 +696,7 @@ public partial class SuperNodesGenerator
       SyntaxFactory.List(
         classDeclaration.AttributeLists.Where(
           attributeList => attributeList.Attributes.All(
-            attribute => attribute.Name.ToString() != POWER_UP_ATTRIBUTE_NAME
+            attribute => attribute.Name.ToString() != Constants.POWER_UP_ATTRIBUTE_NAME
           )
         )
       )
