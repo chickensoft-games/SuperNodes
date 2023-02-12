@@ -42,7 +42,7 @@ public static class Extensions {
     );
   }
 
-  internal static int IndexOfNewlineChar(
+  private static int IndexOfNewlineChar(
     ReadOnlySpan<char> text, out int stride
   ) {
     stride = default;
