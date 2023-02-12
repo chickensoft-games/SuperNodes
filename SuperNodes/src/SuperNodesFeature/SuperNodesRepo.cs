@@ -75,8 +75,6 @@ public class SuperNodesRepo : ISuperNodesRepo {
     ClassDeclarationSyntax classDeclaration,
     INamedTypeSymbol? symbol
   ) {
-    // var symbol = model.GetDeclaredSymbol(classDeclaration);
-
     var name = symbol?.Name ?? classDeclaration.Identifier.ValueText;
     var @namespace = symbol is not null
       ? CodeService.GetContainingNamespace(symbol)

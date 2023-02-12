@@ -70,8 +70,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
     ClassDeclarationSyntax classDeclaration,
     INamedTypeSymbol? symbol
   ) {
-    var node = classDeclaration;
-    var name = node.Identifier.Text;
+    var name = classDeclaration.Identifier.ValueText;
 
     var fullName = symbol?.ToDisplayString(
       SymbolDisplayFormat.FullyQualifiedFormat
@@ -81,20 +80,20 @@ public class PowerUpsRepo : IPowerUpsRepo {
     );
     var baseClass = baseType ?? "global::Godot.Node";
 
-    var typeParameters = node.TypeParameterList?.Parameters
+    var typeParameters = classDeclaration.TypeParameterList?.Parameters
       .Select(parameter => parameter.Identifier.Text)
       .ToImmutableArray() ?? ImmutableArray<string>.Empty;
 
     // get only the interfaces shown in the power-up's source code
     var plainInterfaces = (
-      node.BaseList?.Types
+      classDeclaration.BaseList?.Types
       .Where(type => type.Type is IdentifierNameSyntax)
       .Select(type => (type.Type as IdentifierNameSyntax)!.Identifier.Text)
       .ToImmutableHashSet()
     ) ?? new HashSet<string>().ToImmutableHashSet();
 
     var genericInterfaces = (
-      node.BaseList?.Types
+      classDeclaration.BaseList?.Types
       .Where(type => type.Type is GenericNameSyntax)
       .Select(type => (type.Type as GenericNameSyntax)!.Identifier.Text)
       .ToImmutableHashSet()
@@ -122,7 +121,7 @@ public class PowerUpsRepo : IPowerUpsRepo {
       ? CodeService.GetUsings(symbol)
       : ImmutableHashSet<string>.Empty;
 
-    var hasOnPowerUpMethod = node.Members.Any(
+    var hasOnPowerUpMethod = classDeclaration.Members.Any(
       member => member is MethodDeclarationSyntax method
         && method.Identifier.Text == $"On{name}"
     );
@@ -133,11 +132,11 @@ public class PowerUpsRepo : IPowerUpsRepo {
       Namespace: @namespace,
       Name: name,
       FullName: fullName,
-      Location: node.GetLocation(),
+      Location: classDeclaration.GetLocation(),
       BaseClass: baseClass,
       TypeParameters: typeParameters,
       Interfaces: interfaces,
-      Source: node.ToString(),
+      Source: classDeclaration.ToString(),
       PropsAndFields: CodeService.GetPropsAndFields(members),
       Usings: usings,
       HasOnPowerUpMethod: hasOnPowerUpMethod
