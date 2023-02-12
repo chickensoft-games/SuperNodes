@@ -1,4 +1,4 @@
-namespace SuperNodes.Repositories;
+namespace SuperNodes.SuperNodes;
 
 /// <summary>
 /// Handles logic for generating SuperNodes.
