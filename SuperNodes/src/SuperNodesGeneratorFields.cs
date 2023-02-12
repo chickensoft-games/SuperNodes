@@ -2,6 +2,7 @@ namespace SuperNodes;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using SuperNodes.Models;
 
 public partial class SuperNodesGenerator {
   /// <summary>
