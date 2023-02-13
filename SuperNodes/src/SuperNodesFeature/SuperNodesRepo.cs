@@ -83,15 +83,20 @@ public class SuperNodesRepo : ISuperNodesRepo {
     // Make sure the SuperNode declares the following method:
     // `public override partial void _Notification(long what);`
     var hasPartialNotificationMethod = classDeclaration.Members.Any(
-      member => member is MethodDeclarationSyntax method &&
-        method.Modifiers.Any(modifier => modifier.Text == "public") &&
-        method.Modifiers.Any(modifier => modifier.Text == "override") &&
-        method.Modifiers.Any(modifier => modifier.Text == "partial") &&
-        method.ReturnType.ToString() == "void" &&
-        method.Identifier.Text == "_Notification" &&
-        method.ParameterList.Parameters.Count == 1 &&
-        method.ParameterList.Parameters.First()!.Type?.ToString() == "long" &&
-        method.ParameterList.Parameters.First()!.Identifier.Text == "what"
+      member => {
+        if (member is not MethodDeclarationSyntax method) {
+          return false;
+        }
+        var firstParam = method.ParameterList.Parameters.FirstOrDefault();
+        return
+          method.Modifiers.Any(modifier => modifier.ValueText == "public") &&
+          method.Modifiers.Any(modifier => modifier.ValueText == "override") &&
+          method.Modifiers.Any(modifier => modifier.ValueText == "partial") &&
+          method.ReturnType.ToString() == "void" &&
+          method.Identifier.ValueText == "_Notification" &&
+          firstParam?.Type?.ToString() == "long" &&
+          firstParam?.Identifier.ValueText == "what";
+      }
     );
 
     // We want to see if the script implements OnNotification(long). It's
@@ -99,9 +104,9 @@ public class SuperNodesRepo : ISuperNodesRepo {
     var hasNotificationMethodHandler = classDeclaration.Members.Any(
       member => member is MethodDeclarationSyntax method &&
         method.ReturnType.ToString() == "void" &&
-        method.Identifier.Text == "OnNotification" &&
-        method.ParameterList.Parameters.Count == 1 &&
-        method.ParameterList.Parameters.First()!.Type?.ToString() == "long"
+        method.Identifier.ValueText == "OnNotification" &&
+        method.ParameterList.Parameters.FirstOrDefault()?.Type?.ToString()
+          == "long"
     );
 
     // Find the [SuperNode] attribute on the class.
@@ -125,7 +130,7 @@ public class SuperNodesRepo : ISuperNodesRepo {
         member.Identifier.ValueText
       )
     )
-    .Select(method => method.Identifier.Text)
+    .Select(method => method.Identifier.ValueText)
     .ToList();
 
     var members = symbol?.GetMembers() ?? ImmutableArray<ISymbol>.Empty;

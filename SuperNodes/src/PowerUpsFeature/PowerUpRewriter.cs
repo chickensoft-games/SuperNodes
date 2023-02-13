@@ -50,7 +50,7 @@ public class PowerUpRewriter : CSharpSyntaxRewriter {
   /// </summary>
   /// <param name="node">Identifier name syntax node.</param>
   public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
-    TypeParameters.TryGetValue(node.Identifier.Text, out var replacement)
+    TypeParameters.TryGetValue(node.Identifier.ValueText, out var replacement)
       ? SyntaxFactory
         .IdentifierName(SyntaxFactory.Identifier(replacement))
         .WithTriviaFrom(node)
