@@ -12,7 +12,7 @@ public readonly record struct GeneratorOutput(
   IList<Diagnostic> Diagnostics
 );
 
-public static class TestUtils {
+public static class Tester {
   public static SemanticModel GetSemanticModel(string code) {
     var tree = CSharpSyntaxTree.ParseText(code);
     var root = tree.GetRoot();
@@ -75,7 +75,7 @@ public static class TestUtils {
   /// <typeparam name="T">Type of the node to find in the tree.</typeparam>
   /// <returns>First matching node within the tree of type
   /// <typeparamref name="T" />.</returns>
-  public static T ParseAndFind<T>(string code) where T : SyntaxNode
+  public static T Parse<T>(string code) where T : SyntaxNode
     => (T)CSharpSyntaxTree
       .ParseText(code)
       .GetRoot()
@@ -92,7 +92,7 @@ public static class TestUtils {
   /// <typeparam name="TSymbol">Type of symbol to find.</typeparam>
   /// <returns>First matching node within the tree of type
   /// <typeparamref name="TNode" />.</returns>
-  public static TNode ParseAndFind<TNode, TSymbol>(string code, out TSymbol symbol)
+  public static TNode Parse<TNode, TSymbol>(string code, out TSymbol symbol)
     where TNode : SyntaxNode
     where TSymbol : ISymbol {
     var tree = CSharpSyntaxTree.ParseText(code);
@@ -103,6 +103,11 @@ public static class TestUtils {
 
     symbol = (TSymbol)CSharpCompilation
       .Create("AssemblyName")
+      .AddReferences(
+        MetadataReference.CreateFromFile(
+          typeof(object).Assembly.Location
+        )
+      )
       .AddSyntaxTrees(tree)
       .GetSemanticModel(tree)
       .GetDeclaredSymbol(node)!;

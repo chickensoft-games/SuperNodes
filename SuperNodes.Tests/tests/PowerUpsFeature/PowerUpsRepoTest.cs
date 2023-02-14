@@ -32,7 +32,7 @@ public class PowerUpsRepoTest {
       }
     """;
 
-    var classDeclaration = TestUtils.ParseAndFind<ClassDeclarationSyntax>(code);
+    var classDeclaration = Tester.Parse<ClassDeclarationSyntax>(code);
 
     powerUpsRepo.IsPowerUpSyntaxCandidate(classDeclaration)
       .ShouldBeTrue();
@@ -50,7 +50,7 @@ public class PowerUpsRepoTest {
       }
     """;
 
-    var classDeclaration = TestUtils.ParseAndFind<ClassDeclarationSyntax>(code);
+    var classDeclaration = Tester.Parse<ClassDeclarationSyntax>(code);
 
     powerUpsRepo.IsPowerUpSyntaxCandidate(classDeclaration)
       .ShouldBeFalse();
@@ -73,15 +73,14 @@ public class PowerUpsRepoTest {
       }
     """;
 
-    var classDeclaration
-      = TestUtils.ParseAndFind<ClassDeclarationSyntax, INamedTypeSymbol>(
-        code, out var symbol
-      );
+    var node = Tester.Parse<ClassDeclarationSyntax, INamedTypeSymbol>(
+      code, out var symbol
+    );
 
-    codeService.Setup(cs => cs.GetTypeParameters(classDeclaration))
+    codeService.Setup(cs => cs.GetTypeParameters(node))
       .Returns(ImmutableArray<string>.Empty);
     codeService.Setup(cs => cs.GetVisibleInterfacesFullyQualified(
-      classDeclaration, symbol
+      node, symbol
     )).Returns(ImmutableHashSet<string>.Empty);
     codeService.Setup(cs => cs.GetContainingNamespace(symbol))
       .Returns(@namespace);
@@ -90,17 +89,17 @@ public class PowerUpsRepoTest {
     codeService.Setup(cs => cs.GetPropsAndFields(symbol.GetMembers()!))
       .Returns(ImmutableArray<PropOrField>.Empty);
 
-    var powerUp = powerUpsRepo.GetPowerUp(classDeclaration, symbol);
+    var powerUp = powerUpsRepo.GetPowerUp(node, symbol);
 
     powerUp.ShouldNotBeNull();
     powerUp.Namespace.ShouldBe(@namespace);
     powerUp.Name.ShouldBe(@class);
     powerUp.FullName.ShouldBe($"global::{@namespace}.{@class}");
-    powerUp.Location.ShouldBe(classDeclaration.GetLocation());
+    powerUp.Location.ShouldBe(node.GetLocation());
     powerUp.BaseClass.ShouldBe("object");
     powerUp.TypeParameters.ShouldBeEmpty();
     powerUp.Interfaces.ShouldBeEmpty();
-    powerUp.Source.ShouldBe(classDeclaration.ToString());
+    powerUp.Source.ShouldBe(node.ToString());
     powerUp.PropsAndFields.ShouldBeEmpty();
     powerUp.Usings.ShouldBeEmpty();
     powerUp.HasOnPowerUpMethod.ShouldBeTrue();

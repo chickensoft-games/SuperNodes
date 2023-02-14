@@ -1,5 +1,7 @@
 namespace SuperNodes.Common.Models;
 
+using System.Collections.Immutable;
+
 /// <summary>
 /// Description of an attribute applied to a class field or property member.
 /// </summary>
@@ -11,5 +13,5 @@ namespace SuperNodes.Common.Models;
 public record AttributeDescription(
   string Name,
   string Type,
-  string[] ArgumentExpressions
+  ImmutableArray<string> ArgumentExpressions
 );

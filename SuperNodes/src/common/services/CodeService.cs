@@ -232,7 +232,7 @@ public class CodeService : ICodeService {
         ) ?? string.Empty,
         ArgumentExpressions: attribute.ConstructorArguments.Select(
           arg => arg.ToCSharpString()
-        ).ToArray()
+        ).ToImmutableArray()
       )
     ).ToImmutableHashSet();
 }
