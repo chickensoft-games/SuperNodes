@@ -1,13 +1,13 @@
 # SuperNodes
 
-[![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage]
+[![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord][discord-badge]][discord] ![line coverage][line-coverage]
 
 **Supercharge your Godot nodes with lifecycle-aware power-ups and third party source generators.**
 
 ---
 
 <p align="center">
-<img alt="Chicken CLI Logo" src="doc_assets/super_nodes.svg" width="200">
+<img alt="SuperNodes Logo" src="doc_assets/super_nodes.svg" width="200">
 </p>
 
 SuperNodes is a source generator for Godot 4 projects written in C#. By adding just two lines of boilerplate code to each of your node scripts, you can use multiple lifecycle-aware third-party source generators harmoniously and add additional state to multiple types of nodes by injecting methods and properties, something that isn't possible with [default interface implementations][default-interfaces] alone.
@@ -628,6 +628,7 @@ Special thanks to those in the Godot and Chickensoft Discord Servers for supplyi
 [chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
 [discord]: https://discord.gg/gSjaPgMmYW
+[discord-badge]: https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white
 [line-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/line_coverage.svg
 
 <!-- Content -->
