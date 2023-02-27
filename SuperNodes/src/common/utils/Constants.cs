@@ -297,6 +297,8 @@ public class Constants {
       string Name,
       Type Type,
       bool IsField,
+      bool IsMutable,
+      bool IsReadable,
       IDictionary<string, ScriptAttributeDescription> Attributes
     );
     """;

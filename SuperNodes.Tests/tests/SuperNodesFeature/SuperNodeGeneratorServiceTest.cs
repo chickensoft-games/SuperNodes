@@ -249,6 +249,8 @@ public class SuperNodeGeneratorServiceTest {
         "SomeProperty",
         typeof(int),
         false,
+        true,
+        true,
         new Dictionary<string, ScriptAttributeDescription>() {
           ["global::Godot.ExportAttribute"] =
             new ScriptAttributeDescription(
@@ -270,6 +272,8 @@ public class SuperNodeGeneratorServiceTest {
       ["_someField"] = new ScriptPropertyOrField(
         "_someField",
         typeof(string),
+        true,
+        true,
         true,
         ImmutableDictionary<string, ScriptAttributeDescription>.Empty
       )

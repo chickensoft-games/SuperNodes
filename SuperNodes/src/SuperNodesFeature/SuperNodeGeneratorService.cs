@@ -226,6 +226,8 @@ public class SuperNodeGeneratorService
       fields.Add($"{Tab(2)}\"{propOrField.NameReference}\",");
       fields.Add($"{Tab(2)}typeof({propOrField.Type}),");
       fields.Add($"{Tab(2)}{propOrField.IsField.ToString().ToLower()},");
+      fields.Add($"{Tab(2)}{propOrField.IsMutable.ToString().ToLower()},");
+      fields.Add($"{Tab(2)}{propOrField.IsReadable.ToString().ToLower()},");
       var attributes = propOrField.Attributes;
       if (attributes.Length > 0) {
         fields.Add(
@@ -337,6 +339,11 @@ public class SuperNodeGeneratorService
       ") {",
       $"{Tab(1)}switch (scriptProperty) {{",
     };
+
+    // Only allow readable fields to be accessed.
+    propsAndFields = propsAndFields.Where(
+      propOrField => propOrField.IsReadable
+    ).ToImmutableArray();
 
     foreach (var propOrField in propsAndFields) {
       getPropertyOrFieldFn.AddRange(new string[] {
