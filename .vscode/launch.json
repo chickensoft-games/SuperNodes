@@ -5,7 +5,7 @@
       // Use IntelliSense to find out which attributes exist for C# debugging
       // Use hover for the description of the existing attributes
       // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
-      "name": ".NET Core Launch (console)",
+      "name": "Debug Unit Tests",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -17,10 +17,37 @@
       "console": "internalConsole",
       "stopAtEntry": false
     },
+    // For these launch configurations to work, you need to setup a GODOT4
+    // environment variable. On mac or linux, this can be done by adding
+    // the following to your .zshrc, .bashrc, or .bash_profile file:
+    // export GODOT4="/Applications/Godot.app/Contents/MacOS/Godot"
     {
-      "name": ".NET Core Attach",
+      "name": "Debug Test Cases",
       "type": "coreclr",
-      "request": "attach"
-    }
+      "request": "launch",
+      "preLaunchTask": "build-testcases",
+      "program": "${env:GODOT4}",
+      "args": [
+        // These command line flags are used by GoDotTest to run tests.
+        "--run-tests",
+        "--quit-on-finish"
+      ],
+      "cwd": "${workspaceFolder}/SuperNodes.TestCases",
+      "stopAtEntry": false,
+    },
+    {
+      "name": "Debug Current Test Case",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-testcases",
+      "program": "${env:GODOT4}",
+      "args": [
+        // These command line flags are used by GoDotTest to run tests.
+        "--run-tests=${fileBasenameNoExtension}",
+        "--quit-on-finish"
+      ],
+      "cwd": "${workspaceFolder}/SuperNodes.TestCases",
+      "stopAtEntry": false,
+    },
   ]
 }

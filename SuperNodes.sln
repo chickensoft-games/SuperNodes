@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperNodes.Example", "Super
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperNodes.Tests", "SuperNodes.Tests\SuperNodes.Tests.csproj", "{52980ED7-7DB7-4EAD-92C5-CBB051B7E529}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperNodes.TestCases", "SuperNodes.TestCases\SuperNodes.TestCases.csproj", "{58C0A5AE-991C-48A0-B4FD-975511872941}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{52980ED7-7DB7-4EAD-92C5-CBB051B7E529}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52980ED7-7DB7-4EAD-92C5-CBB051B7E529}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52980ED7-7DB7-4EAD-92C5-CBB051B7E529}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58C0A5AE-991C-48A0-B4FD-975511872941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58C0A5AE-991C-48A0-B4FD-975511872941}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58C0A5AE-991C-48A0-B4FD-975511872941}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{58C0A5AE-991C-48A0-B4FD-975511872941}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
