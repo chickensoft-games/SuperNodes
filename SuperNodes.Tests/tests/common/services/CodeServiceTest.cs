@@ -198,8 +198,10 @@ public class BasicSyntaxOperationsServiceTest {
     namespace Foo {
       using System;
 
-      public class Bar : IFoo {
+      public class Bar : IFoo, IBar {
         bool IFoo.FooProp => true;
+
+        public bool BarProp { get; } = true;
 
         public event Action? MyEvent;
 
@@ -216,6 +218,10 @@ public class BasicSyntaxOperationsServiceTest {
 
       public interface IFoo {
         bool FooProp { get; }
+      }
+
+      public interface IBar {
+        bool BarProp { get; }
       }
     }
     """;
@@ -258,6 +264,29 @@ public class BasicSyntaxOperationsServiceTest {
           TypeParts: ImmutableArray<SimpleSymbolDisplayPart>.Empty
         ),
         new PropOrField(
+          Name: "BarProp",
+          Reference: "BarProp",
+          Type: "bool",
+          Attributes: ImmutableArray<AttributeDescription>.Empty,
+          IsField: false,
+          IsMutable: false,
+          IsReadable: true,
+          NameParts: new SimpleSymbolDisplayPart[] {
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.InterfaceName, "IBar"
+            ),
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.Punctuation, "."
+            ),
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.PropertyName, "BarProp"
+            )
+          }.ToImmutableArray(),
+          TypeParts: ImmutableArray.Create(
+            new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Keyword, "bool")
+          )
+        ),
+        new PropOrField(
           Name: "FooProp",
           Reference: "FooProp",
           Type: "bool",
@@ -266,9 +295,15 @@ public class BasicSyntaxOperationsServiceTest {
           IsMutable: false,
           IsReadable: true,
           NameParts: new SimpleSymbolDisplayPart[] {
-            new SimpleSymbolDisplayPart(SymbolDisplayPartKind.InterfaceName, "IFoo"),
-            new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Punctuation, "."),
-            new SimpleSymbolDisplayPart(SymbolDisplayPartKind.PropertyName, "FooProp")
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.InterfaceName, "IFoo"
+            ),
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.Punctuation, "."
+            ),
+            new SimpleSymbolDisplayPart(
+              SymbolDisplayPartKind.PropertyName, "FooProp"
+            )
           }.ToImmutableArray(),
           TypeParts: ImmutableArray.Create(
             new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Keyword, "bool")

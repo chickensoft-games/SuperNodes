@@ -32,6 +32,9 @@ public class PowerUpGeneratorTest {
         string scriptProperty, ITypeReceiver<TResult> receiver
       ) => default!;
 
+      [PowerUpIgnore]
+      public int IgnoreMe { get; set; } = 1;
+
       public string AddedProperty { get; set; } = "Property";
 
       private readonly int _addedField = 10;

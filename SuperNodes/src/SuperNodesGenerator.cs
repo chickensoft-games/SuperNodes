@@ -18,12 +18,12 @@ using SuperNodes.SuperNodesFeature;
 [Generator]
 public partial class SuperNodesGenerator
   : ChickensoftGenerator, IIncrementalGenerator {
+  public ICodeService CodeService { get; }
+  public IPowerUpGeneratorService PowerUpGeneratorService { get; }
   public IPowerUpsRepo PowerUpsRepo { get; }
   public ISuperNodesRepo SuperNodesRepo { get; }
-  public ICodeService CodeService { get; }
   public ISuperNodeGeneratorService SuperNodeGeneratorService { get; }
   public ISuperNodeGenerator SuperNodeGenerator { get; }
-  public IPowerUpGeneratorService PowerUpGeneratorService { get; }
   public IPowerUpGenerator PowerUpGenerator { get; }
   public static Log Log { get; } = new Log();
 
@@ -34,11 +34,11 @@ public partial class SuperNodesGenerator
   /// </summary>
   public SuperNodesGenerator() {
     CodeService = new CodeService();
+    PowerUpGeneratorService = new PowerUpGeneratorService();
     PowerUpsRepo = new PowerUpsRepo(CodeService);
     SuperNodesRepo = new SuperNodesRepo(CodeService);
     SuperNodeGeneratorService = new SuperNodeGeneratorService();
     SuperNodeGenerator = new SuperNodeGenerator(SuperNodeGeneratorService);
-    PowerUpGeneratorService = new PowerUpGeneratorService();
     PowerUpGenerator = new PowerUpGenerator(PowerUpGeneratorService);
   }
 

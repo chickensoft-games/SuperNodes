@@ -8,17 +8,6 @@ public class Constants {
   /// <summary>Spaces per tab. Adjust to your generator's liking.</summary>
   public static int SPACES_PER_INDENT = 2;
 
-  public static readonly ImmutableHashSet<string>
-    BlacklistedStaticPowerUpProperties = new HashSet<string> {
-      "PropertiesAndFields"
-  }.ToImmutableHashSet();
-
-  public static readonly ImmutableHashSet<string>
-    BlacklistedStaticPowerUpMethods = new HashSet<string> {
-    "GetScriptPropertyOrFieldType",
-    "GetScriptPropertyOrField"
-  }.ToImmutableHashSet();
-
   public const string DEFAULT_BASE_CLASS = "global::Godot.Node";
 
   public static string BaseClass { get; set; } = DEFAULT_BASE_CLASS;
@@ -231,12 +220,32 @@ public class Constants {
     /// <summary>
     /// Power-up attribute. Add this to a class to create a mixin.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     internal class PowerUpAttribute : Attribute {
       /// <summary>PowerUp attribute. Add this to a class to create a mixin.
       /// </summary>
       internal PowerUpAttribute() { }
     }
     """;
+
+  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME = "PowerUpIgnore";
+  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL = "PowerUpIgnoreAttribute";
+  public const string POWER_UP_IGNORE_ATTRIBUTE_SOURCE = """
+    using System;
+
+    /// <summary>
+    /// Place on PowerUp members to prevent them from being copied to the
+    /// SuperNode the PowerUp is applied to.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.All)]
+    internal class PowerUpIgnoreAttribute : Attribute {
+    /// <summary>
+    /// Place on PowerUp members to prevent them from being copied to the
+    /// SuperNode the PowerUp is applied to.
+    /// </summary>
+      internal PowerUpIgnoreAttribute() { }
+    }
+  """;
 
   public const string SUPER_NODE_MISSING_NOTIFICATION_METHOD
     = "SUPER_NODE_MISSING_NOTIFICATION_METHOD";
@@ -315,5 +324,6 @@ public class Constants {
       [STATIC_REFLECTION_NAME] = STATIC_REFLECTION_SOURCE,
       [SUPER_NODE_ATTRIBUTE_NAME_FULL] = SUPER_NODE_ATTRIBUTE_SOURCE,
       [POWER_UP_ATTRIBUTE_NAME_FULL] = POWER_UP_ATTRIBUTE_SOURCE,
+      [POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL] = POWER_UP_IGNORE_ATTRIBUTE_SOURCE,
     }.ToImmutableDictionary();
 }

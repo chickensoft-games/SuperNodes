@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Shared.Extensions;
 using SuperNodes.Common.Models;
 
 /// <summary>
@@ -303,20 +304,23 @@ public class CodeService : ICodeService {
       ) {
         isMutable = !property.IsReadOnly;
         isReadable = !property.IsWriteOnly;
-        if (
-          !member.CanBeReferencedByName &&
-          property.ExplicitInterfaceImplementations.Any()
-        ) {
-          // Property can only be referenced by its explicit interface.
-          var interfaceName = property
-            .ExplicitInterfaceImplementations[0]
-            .ContainingType
-            .Name;
+        var hasExplicitInterfaceImplementations = property
+          .ExplicitInterfaceImplementations
+          .Any();
+        var correspondingInterfaceMembers = member
+          .ExplicitOrImplicitInterfaceImplementations();
+        var declaredInInterface = correspondingInterfaceMembers.Any();
+        if (declaredInInterface) {
+          // All members originally declared in interfaces are referred to by
+          // IInterface.Name to help avoid naming collisions
 
-          name = name.Split('.').Last();
+          var interfaceMember = correspondingInterfaceMembers[0];
+          var interfaceName = interfaceMember.ContainingType.Name;
+
+          name = interfaceMember.Name;
 
           nameParts = ExtractRelevantIdentifierParts(
-            interfaceName, property.ToDisplayParts()
+            interfaceName, interfaceMember.ToDisplayParts()
           );
         }
         type = property.Type.ToString();

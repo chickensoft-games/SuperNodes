@@ -49,7 +49,7 @@ public class SuperNodesGeneratorTest {
     var result = Tester.Generate(source);
 
     result.Diagnostics.ShouldBeEmpty();
-    result.Outputs.Count.ShouldBe(7);
+    result.Outputs.Count.ShouldBe(8);
   }
 
   [Fact]

@@ -95,22 +95,12 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     newClassDeclaration = newClassDeclaration.WithMembers(
       SyntaxFactory.List(
         newClassDeclaration.Members.Where(
-          member => (member is not MethodDeclarationSyntax method || !(
-            Constants.BlacklistedStaticPowerUpMethods.Contains(
-              method.Identifier.ToString()
-            ) &&
-            method.Modifiers.Any(
-              modifier => modifier.IsKind(SyntaxKind.StaticKeyword)
+          member => member.AttributeLists.All(
+            attributeList => attributeList.Attributes.Any(
+              attribute => attribute.Name.ToString()
+                != Constants.POWER_UP_IGNORE_ATTRIBUTE_NAME
             )
-          ))
-          && (member is not PropertyDeclarationSyntax prop || !(
-            Constants.BlacklistedStaticPowerUpProperties.Contains(
-              prop.Identifier.ToString()
-            ) &&
-            prop.Modifiers.Any(
-              modifier => modifier.IsKind(SyntaxKind.StaticKeyword)
-            )
-          ))
+          )
         )
       )
     );

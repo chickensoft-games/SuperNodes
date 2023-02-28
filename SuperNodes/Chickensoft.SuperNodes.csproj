@@ -12,7 +12,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <Title>SuperNodes</Title>
-    <Description>Supercharge your Godot nodes with lifecycle-aware power-ups and third party source generators</Description>
+    <Description>Supercharge your Godot nodes with lifecycle-aware mixins, third party source generators, script introspection, and dynamic property manipulation — all without runtime reflection!</Description>
     <Copyright>© 2023 Chickensoft Games</Copyright>
     <Company>Chickensoft</Company>
 

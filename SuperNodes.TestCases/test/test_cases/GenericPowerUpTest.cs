@@ -8,7 +8,7 @@ using Shouldly;
 
 // SuperNode that applies a generic PowerUp.
 [SuperNode(typeof(GenericPowerUp<string, bool>))]
-public partial class NodeWithGenericPowerUp : Node {
+public partial class GenericPowerUpNode : Node {
   public override partial void _Notification(int what);
 }
 
@@ -58,14 +58,23 @@ public partial class GenericPowerUp<TA, TB>
     isAanA.ShouldBeTrue();
   }
 
-  // Stubs for the generated static reflection tables generated on SuperNodes
 #pragma warning disable RCS1158
+
+  // Stubs for the generated static reflection tables generated on SuperNodes.
+  //
+  // We know that SuperNodes will generate these, so we mark them with
+  // [PowerUpIgnore] to prevent them from being copied over to the SuperNode
+  // we're applied to. If we didn't, we'd have a compile-time error.
+
+  [PowerUpIgnore]
   internal static ImmutableDictionary<string, ScriptPropertyOrField>
     PropertiesAndFields { get; } = default!;
 
+  [PowerUpIgnore]
   internal static TResult GetScriptPropertyOrFieldType<TResult>(
     string scriptProperty, ITypeReceiver<TResult> receiver
   ) => default!;
+
 #pragma warning restore RCS1158
 
 }
@@ -75,7 +84,7 @@ public class GenericPowerUpTest : TestClass {
 
   [Test]
   public void GenericPowerUpWorks() {
-    var node = new NodeWithGenericPowerUp();
+    var node = new GenericPowerUpNode();
     var generic = (IGenericPowerUp<string, bool>)node;
     var other = (IOtherInterface<string>)node;
     generic.A = "Hello";
@@ -84,6 +93,6 @@ public class GenericPowerUpTest : TestClass {
     generic.A.ShouldBe("Hello");
     other.A.ShouldBe("World!");
     node._Notification((int)Node.NotificationReady);
-    node.Called.ShouldBe(new[] { nameof(NodeWithGenericPowerUp) });
+    node.Called.ShouldBe(new[] { nameof(GenericPowerUpNode) });
   }
 }
