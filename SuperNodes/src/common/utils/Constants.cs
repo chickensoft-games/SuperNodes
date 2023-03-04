@@ -176,76 +176,16 @@ public class Constants {
 
   public const string SUPER_NODE_ATTRIBUTE_NAME = "SuperNode";
   public const string SUPER_NODE_ATTRIBUTE_NAME_FULL = "SuperNodeAttribute";
-  public const string SUPER_NODE_ATTRIBUTE_SOURCE = """
-    using System;
 
-    /// <summary>
-    /// SuperNode attribute. Add this to a Godot node script class to use
-    /// functionality from other compatible source generators.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    internal class SuperNodeAttribute : Attribute {
-      /// <summary>
-      /// Source generator lifecycle methods and/or PowerUps to invoke from
-      /// <see cref="Godot.GodotObject._Notification(int what)" />.
-      /// </summary>
-      internal object[] Args { get; }
+  public const string POWER_UP_ATTRIBUTE_NAME
+    = "PowerUp";
+  public const string POWER_UP_ATTRIBUTE_NAME_FULL
+    = "PowerUpAttribute";
 
-      /// <summary>
-      /// SuperNode attribute. Add this to a Godot node script class to use
-      /// functionality from other compatible source generators.
-      /// </summary>
-      internal SuperNodeAttribute() => Args = Array.Empty<object>();
-
-      /// <summary>
-      /// SuperNode attribute. Add this to a Godot node script class to use
-      /// functionality from other compatible source generators.
-      /// <br />
-      /// Compatible source generator lifecycle methods or PowerUps that will
-      /// be invoked from
-      /// <see cref="Godot.GodotObject._Notification(int what)"/> in the order
-      /// specified here.
-      /// </summary>
-      /// <param name="args">Compatible source generator lifecycle method
-      /// names or the types of PowerUps.</param>
-      internal SuperNodeAttribute(params object[] args) => Args = args;
-    }
-    """;
-
-  public const string POWER_UP_ATTRIBUTE_NAME = "PowerUp";
-  public const string POWER_UP_ATTRIBUTE_NAME_FULL = "PowerUpAttribute";
-  public const string POWER_UP_ATTRIBUTE_SOURCE = """
-    using System;
-
-    /// <summary>
-    /// Power-up attribute. Add this to a class to create a mixin.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    internal class PowerUpAttribute : Attribute {
-      /// <summary>PowerUp attribute. Add this to a class to create a mixin.
-      /// </summary>
-      internal PowerUpAttribute() { }
-    }
-    """;
-
-  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME = "PowerUpIgnore";
-  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL = "PowerUpIgnoreAttribute";
-  public const string POWER_UP_IGNORE_ATTRIBUTE_SOURCE = """
-    using System;
-
-    /// <summary>
-    /// Place on PowerUp members to prevent them from being copied to the
-    /// SuperNode the PowerUp is applied to.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.All)]
-    internal class PowerUpIgnoreAttribute : Attribute {
-    /// <summary>
-    /// Place on PowerUp members to prevent them from being copied to the
-    /// SuperNode the PowerUp is applied to.
-    /// </summary>
-      internal PowerUpIgnoreAttribute() { }
-    }
-  """;
+  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME
+    = "PowerUpIgnore";
+  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL
+    = "PowerUpIgnoreAttribute";
 
   public const string SUPER_NODE_MISSING_NOTIFICATION_METHOD
     = "SUPER_NODE_MISSING_NOTIFICATION_METHOD";
@@ -253,77 +193,12 @@ public class Constants {
   public const string SUPER_NODE_INVALID_POWER_UP
     = "SUPER_NODE_INVALID_POWER_UP";
 
-  public const string STATIC_REFLECTION_SOURCE = """
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-
-    /// <summary>
-    /// Object containing a single method that can receive a generic type argument.
-    /// Sometimes, it is desirable for a PowerUp to be able to access the type of a
-    /// field or property on the node it is applied to. This interface allows
-    /// PowerUps to create a receiver object for the type in a generic context,
-    /// which would otherwise require a source generator or reflection to obtain.
-    /// <br />
-    /// This interface is supplied by SuperNodes.
-    /// </summary>
-    /// <typeparam name="TResult">Return value of the receive method.</typeparam>
-    internal interface ITypeReceiver<TResult> {
-      /// <summary>
-      /// Generic method which receives the type of the field or property.
-      /// </summary>
-      /// <typeparam name="T">Type of the field or property, as a generic type
-      /// variable.</typeparam>
-      /// <returns>A value of type <typeparamref name="TResult" />.</returns>
-      TResult Receive<T>();
-    }
-
-    /// <summary>
-    /// A description of an attribute used within a node script. This model is
-    /// supplied by SuperNodes.
-    /// </summary>
-    /// <param name="Name">Name of the attribute, without the "Attribute" suffix.
-    /// </param>
-    /// <param name="NameFullyQualified">Fully qualified name of the attribute
-    /// class.</param>
-    /// <param name="ArgumentExpressions">Expressions (as plain text) given for each
-    /// argument.</param>
-    internal record ScriptAttributeDescription(
-      string Name,
-      Type Type,
-      ImmutableArray<dynamic> ArgumentExpressions
-    );
-
-    /// <summary>
-    /// A description of a property or field used within a node script. This model
-    /// is supplied by SuperNodes.
-    /// </summary>
-    /// <param name="Name">Name of the field or property.</param>
-    /// <param name="Type">Type of the field or property.</param>
-    /// <param name="Attributes">Descriptions of the attributes applied to the field
-    /// or property.</param>
-    internal record struct ScriptPropertyOrField(
-      string Name,
-      Type Type,
-      bool IsField,
-      bool IsMutable,
-      bool IsReadable,
-      IDictionary<string, ScriptAttributeDescription> Attributes
-    );
-    """;
-
-  public const string STATIC_REFLECTION_NAME = "StaticReflection";
-
   /// <summary>
   /// A dictionary of source code that must be injected into the compilation
   /// regardless of whether or not the user has taken advantage of any of the
   /// other features of this source generator.
   /// </summary>
   public static readonly ImmutableDictionary<string, string>
-    PostInitializationSources = new Dictionary<string, string>() {
-      [STATIC_REFLECTION_NAME] = STATIC_REFLECTION_SOURCE,
-      [SUPER_NODE_ATTRIBUTE_NAME_FULL] = SUPER_NODE_ATTRIBUTE_SOURCE,
-      [POWER_UP_ATTRIBUTE_NAME_FULL] = POWER_UP_ATTRIBUTE_SOURCE,
-      [POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL] = POWER_UP_IGNORE_ATTRIBUTE_SOURCE,
-    }.ToImmutableDictionary();
+    PostInitializationSources = new Dictionary<string, string>()
+      .ToImmutableDictionary();
 }

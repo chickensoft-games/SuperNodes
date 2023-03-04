@@ -72,6 +72,7 @@ public class SuperNodeGeneratorTest {
     source.ShouldBe("""
     #nullable enable
     using Godot;
+    using SuperNodes.Types;
 
     namespace global::Tests {
       partial class TestSuperNode {
@@ -254,9 +255,10 @@ public class SuperNodeGeneratorTest {
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using Godot;
+    using SuperNodes.Types;
 
     namespace global::Tests {
-      partial class TestSuperNode {
+      partial class TestSuperNode : ISuperNode {
         staticPropsAndFields
 
         getType

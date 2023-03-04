@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using Godot;
 using GoDotTest;
 using Shouldly;
+using SuperNodes.Types;
 
 // SuperNode that applies a generic PowerUp.
 [SuperNode(typeof(GenericPowerUp<string, bool>))]
@@ -22,7 +23,7 @@ public interface IOtherInterface<TA> {
 }
 
 [PowerUp]
-public partial class GenericPowerUp<TA, TB>
+public abstract partial class GenericPowerUp<TA, TB>
   : Node, IGenericPowerUp<TA, TB>, IOtherInterface<TA>, ITestCaseVerifiable {
   public List<string> Called { get; } = new();
 
@@ -49,16 +50,23 @@ public partial class GenericPowerUp<TA, TB>
     // to use an ITypeReceiver object (supplied by SuperNodes).
     var typeReceiver = new TypeReceiver<TA>(A);
 
-    // Make sure the type of A is TA — without reflection!
+    // It's a little convoluted, but we can use SuperNodes to deduce the string
+    // name of a property with generics since SuperNodes replaces the generic
+    // parameters of a PowerUp with the generic arguments given to it from a
+    // SuperNode at build-time. Additionally, typeof also works at
+    // compile-time, allowing us to avoid having to use reflection at runtime.
+    //
+    // Whew!
+    var genericPropertyName = nameof(IGenericPowerUp<TA, TB>) +
+      "<" + this.TypeParam(typeof(TA)) + ", " + this.TypeParam(typeof(TB)) +
+      ">." + nameof(IGenericPowerUp<TA, TB>.A);
     var isAanA
-      = GetScriptPropertyOrFieldType(
-        nameof(IGenericPowerUp<TA, TB>.A), typeReceiver
-      );
+      = GetScriptPropertyOrFieldType(genericPropertyName, typeReceiver);
 
     isAanA.ShouldBeTrue();
   }
 
-#pragma warning disable RCS1158
+#pragma warning disable RCS1158, CA1000
 
   // Stubs for the generated static reflection tables generated on SuperNodes.
   //
@@ -67,15 +75,15 @@ public partial class GenericPowerUp<TA, TB>
   // we're applied to. If we didn't, we'd have a compile-time error.
 
   [PowerUpIgnore]
-  internal static ImmutableDictionary<string, ScriptPropertyOrField>
+  public static ImmutableDictionary<string, ScriptPropertyOrField>
     PropertiesAndFields { get; } = default!;
 
   [PowerUpIgnore]
-  internal static TResult GetScriptPropertyOrFieldType<TResult>(
+  public TResult GetScriptPropertyOrFieldType<TResult>(
     string scriptProperty, ITypeReceiver<TResult> receiver
   ) => default!;
 
-#pragma warning restore RCS1158
+#pragma warning restore CA1000, RCS1158
 
 }
 

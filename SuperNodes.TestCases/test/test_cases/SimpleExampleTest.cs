@@ -1,6 +1,7 @@
 namespace SuperNodes.TestCases;
 
 using Godot;
+using SuperNodes.Types;
 
 [SuperNode(typeof(SimplePowerUp))]
 public partial class SimpleExampleNode : Node {

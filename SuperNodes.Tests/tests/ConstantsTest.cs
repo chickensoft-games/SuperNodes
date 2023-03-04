@@ -19,13 +19,9 @@ public class ConstantsTest {
       .ShouldBeOfType<string>();
     Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL
       .ShouldBeOfType<string>();
-    Constants.SUPER_NODE_ATTRIBUTE_SOURCE
-      .ShouldBeOfType<string>();
     Constants.POWER_UP_ATTRIBUTE_NAME
       .ShouldBeOfType<string>();
     Constants.POWER_UP_ATTRIBUTE_NAME_FULL
-      .ShouldBeOfType<string>();
-    Constants.POWER_UP_ATTRIBUTE_SOURCE
       .ShouldBeOfType<string>();
   }
 }

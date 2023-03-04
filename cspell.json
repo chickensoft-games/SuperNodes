@@ -15,6 +15,7 @@
     "issuecomment",
     "lcov",
     "linecoverage",
+    "Linq",
     "metaprogramming",
     "methodcoverage",
     "missingall",
@@ -40,6 +41,7 @@
     "typeparamref",
     "ulong",
     "Unparented",
-    "Xunit"
+    "Xunit",
+    "Gamedev"
   ]
 }

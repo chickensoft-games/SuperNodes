@@ -39,7 +39,8 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
   public readonly ImmutableArray<string> StaticUsings = ImmutableArray.Create(
     "System",
     "System.Collections.Generic",
-    "System.Collections.Immutable"
+    "System.Collections.Immutable",
+    "SuperNodes.Types"
   );
 
   public ISuperNodeGeneratorService SuperNodeGeneratorService { get; }
@@ -65,6 +66,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
     return Format($$"""
     #nullable enable
     using Godot;
+    using SuperNodes.Types;
 
     {{If(
       node.Namespace is not null,
@@ -158,7 +160,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       node.Namespace is not null,
       $$"""namespace {{node.Namespace}} {"""
     )}}
-      partial class {{node.Name}} {
+      partial class {{node.Name}} : ISuperNode {
         {{propsAndFieldsReflectionTable}}
 
         {{getTypeFn}}

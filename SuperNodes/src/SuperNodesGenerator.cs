@@ -27,7 +27,9 @@ public partial class SuperNodesGenerator
   public IPowerUpGenerator PowerUpGenerator { get; }
   public static Log Log { get; } = new Log();
 
+#pragma warning disable IDE0052
   private static bool _logsFlushed;
+#pragma warning restore IDE0052
 
   /// <summary>
   /// Parameterless constructor used by the .NET SDK tooling.
@@ -49,17 +51,23 @@ public partial class SuperNodesGenerator
     Log.Clear();
     Log.Print("Initializing source generation");
 
-    foreach (var postInitSource in Constants.PostInitializationSources) {
-      context.RegisterPostInitializationOutput(
-        (context) => context.AddSource(
-          $"{postInitSource.Key}.g.cs",
-          SourceText.From(
-            postInitSource.Value.NormalizeLineEndings(),
-            Encoding.UTF8
-          )
-        )
-      );
-    }
+    // We no longer need to output source code for attributes or property types.
+    // It is expected the user will have a PackageReference to SuperNodes.Types.
+    // Providing types in a separate package allows for SuperNodes to be
+    // inspected across assemblies (something that could help with mods, dynamic
+    // loading of scripts, level editors, etc).
+    //
+    // foreach (var postInitSource in Constants.PostInitializationSources) {
+    //   context.RegisterPostInitializationOutput(
+    //     (context) => context.AddSource(
+    //       $"{postInitSource.Key}.g.cs",
+    //       SourceText.From(
+    //         postInitSource.Value.NormalizeLineEndings(),
+    //         Encoding.UTF8
+    //       )
+    //     )
+    //   );
+    // }
 
     var superNodeCandidates = context.SyntaxProvider.CreateSyntaxProvider(
       predicate: (SyntaxNode node, CancellationToken _)
@@ -112,23 +120,26 @@ public partial class SuperNodesGenerator
       action: Execute
     );
 
-#if DEBUG
-    // Very hacky way of only printing out one log file.
-    var syntax = context.SyntaxProvider.CreateSyntaxProvider(
-      predicate: (syntaxNode, _) => syntaxNode is CompilationUnitSyntax,
-      transform: (syntaxContext, _) => syntaxContext.Node
-    );
-    context.RegisterImplementationSourceOutput(
-      syntax,
-      (ctx, _) => {
-        if (_logsFlushed) { return; }
-        ctx.AddSource(
-          "LOG", SourceText.From(Log.Contents, Encoding.UTF8)
-        );
-        _logsFlushed = true;
-      }
-    );
-#endif
+    // When debugging SuperNodes, it can be nice to output a log file. Uncomment
+    // the code below to allow for logging output.
+    //
+    // #if DEBUG
+    //     // Very hacky way of only printing out one log file.
+    //     var syntax = context.SyntaxProvider.CreateSyntaxProvider(
+    //       predicate: (syntaxNode, _) => syntaxNode is CompilationUnitSyntax,
+    //       transform: (syntaxContext, _) => syntaxContext.Node
+    //     );
+    //     context.RegisterImplementationSourceOutput(
+    //       syntax,
+    //       (ctx, _) => {
+    //         if (_logsFlushed) { return; }
+    //         ctx.AddSource(
+    //           "LOG", SourceText.From(Log.Contents, Encoding.UTF8)
+    //         );
+    //         _logsFlushed = true;
+    //       }
+    //     );
+    // #endif
   }
 
   public void Execute(

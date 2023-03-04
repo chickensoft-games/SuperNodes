@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Godot;
 using GoDotTest;
 using Shouldly;
+using SuperNodes.Types;
 
 // SuperNode that uses a third party generator.
 [SuperNode("Generator1", typeof(TestPowerUp), "Generator2")]

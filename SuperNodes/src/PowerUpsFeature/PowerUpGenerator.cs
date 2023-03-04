@@ -142,7 +142,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     );
 
     var allUsings = powerUp.Usings.Union(
-      new string[] { "Godot" }
+      new string[] { "Godot", "SuperNodes.Types" }
     ).Distinct();
 
     var usings = allUsings

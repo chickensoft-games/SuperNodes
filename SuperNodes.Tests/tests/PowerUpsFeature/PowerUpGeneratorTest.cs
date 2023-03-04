@@ -26,9 +26,9 @@ public class PowerUpGeneratorTest {
     [PowerUp]
     public partial class TestPowerUp<TA, TB>
       : Godot.Node, ITestPowerUp<TA, TB> {
-      internal static ScriptPropertyOrField[] PropertiesAndFields { get; }
+      public static ScriptPropertyOrField[] ScriptPropertiesAndFields { get; }
         = default!;
-      internal static TResult GetScriptPropertyOrFieldType<TResult>(
+      public TResult GetScriptPropertyOrFieldType<TResult>(
         string scriptProperty, ITypeReceiver<TResult> receiver
       ) => default!;
 
@@ -133,6 +133,7 @@ public class PowerUpGeneratorTest {
     #nullable enable
     using System.Collections;
     using Godot;
+    using SuperNodes.Types;
 
     namespace Tests {
       partial class TestSuperNode : global::Tests.ITestPowerUp<bool, int>

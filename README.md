@@ -2,21 +2,27 @@
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord][discord-badge]][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
-**Supercharge your Godot nodes with lifecycle-aware power-ups and third party source generators.**
-
 ---
 
 <p align="center">
-<img alt="SuperNodes Logo" src="doc_assets/super_nodes.svg" width="200">
+<img alt="SuperNodes Logo" src="SuperNodes/icon.png" width="200">
 </p>
 
-SuperNodes is a source generator for Godot 4 projects written in C#. By adding just two lines of boilerplate code to each of your node scripts, you can use multiple lifecycle-aware third-party source generators harmoniously and add additional state to multiple types of nodes by injecting methods and properties, something that isn't possible with [default interface implementations][default-interfaces] alone.
+*Supercharge your Godot nodes with lifecycle-aware mixins, third party source generators, script introspection, and dynamic property manipulation — all without runtime reflection!*
 
-Essentially, SuperNodes makes it possible for other unofficial Godot source generators to [play nicely with each other and the official Godot source generators][godot-generator-problems]. SuperNodes also provides a mechanism for you to create PowerUps (similar to "mixins" and "traits" in other languages). These PowerUps can be applied (or "mixed-in") to nodes that are descendants of the same ancestor class that the PowerUp extends.
+---
 
-Naturally, there are a few caveats, and you should only use PowerUps to create wide-reaching behavior to complement other systems, such as automatic ECS integration, logging and analytics, serialization systems, or adding additional state (properties) to nodes. If you create PowerUps for game logic, you risk adding methods and properties whose identifiers conflict with each other (a classic problem when mimicking multiple-inheritance).
+SuperNodes is a source generator that helps give superpowers to C# scripts on Godot nodes.
 
-> Need help with source generators, SuperNodes, and PowerUps? Join the [Chickensoft Discord][Discord] and we'll be happy to help you out!
+- ✅ Apply PowerUps (i.e, mixin other classes) to your scripts that add instance data — you are no longer limited to only adding methods via default interface implementations!
+- ✅ Call lifecycle-aware generated methods from other compatible third-party source generators. Because of the way Godot's official source generators work, it's hard to use multiple source generators that want to observe a node's lifecycle events. SuperNodes solves this problem by providing a mechanism for third-party source generators to hook into the node's lifecycle events.
+- ✅ Minimal boilerplate — just two additional lines of code.
+- ✅ Inspect script properties and fields (including their attributes) during execution using generated tables — no runtime reflection required!
+- ✅ Get and set the value of script properties and fields via their string name at runtime.
+- ✅ Receive the type of a script property or field at runtime as a reified type (i.e., as a type parameter).
+- ✅ No runtime reflection — PowerUps and static reflection tables are generated at compile-time.
+- ✅ Compatible with source-only nuget packages. The included `SharedPowerUps` example describes how to create and consume a source-code only package. Source-only packages are added directly as source code into the project that references them, allowing the source generators in that project to read the included source code as if it had been written in the project itself. This is useful for creating PowerUps that are shared across multiple projects.
+- ✅ Well tested. SuperNodes has 100% line and branch coverage from unit tests, as well as a suite of test cases for fixing bugs, regressions, and integration testing in real-world scenarios. If you find an issue, let us know and we'll get it fixed. It's very important to us to provide good support and ensure SuperNodes is both stable and reliable.
 
 ## 📦 Installation
 
@@ -29,32 +35,147 @@ Simply add SuperNodes as an analyzer dependency to your C# project.
 </ItemGroup>
 ```
 
-## 🔮 Enhanced Nodes
+## 🔮 Superpowers for C# Scripts
 
-To turn your ordinary Godot script class into a SuperNode, add the `[SuperNode]` attribute and a partial method signature for the `_Notification` method.
+Background: many programming languages allow you to combine the contents of one class with another class using features such as [`mixins`][mixins], [`traits`][traits] or even [`templates`][templates] and [`macros`][macros].
+
+C# has a similar (but not as powerful) feature called [default interface implementations][default-interfaces], but it doesn't let you add instance data to a class. More on that in [this section](#🧐-okay-but-how).
+
+To make up for these shortcomings in C#, the SuperNodes generator allows you to create `PowerUps`. PowerUps can add any kind of additional instance data (fields, properties, events, static members, etc) to a C# Godot script, bypassing the limitations of default interface implementations.
+
+If that sounds fun, keep reading!
+
+## 🔋 PowerUps
+
+A *PowerUp* is any class with a `[PowerUp]` attribute whose contents can be copied into any `SuperNode` that it might be applied to. Likewise, a *SuperNode* is just a Godot script class with a `[SuperNode]` attribute on it.
+
+Sometimes programming language patterns are more easily illustrated with code. Below is a simple SuperNode script that applies a *PowerUp* that performs actions in response to lifecycle events. While it's not exactly very useful by itself, but it demonstrates some of the basic concepts which can be built upon to create more complex behaviors.
+
+Making a SuperNode is simple: just add the `[SuperNode]` attribute to your script class and a partial method signature for the `_Notification` method. At build time (or whenever the source generators run), the SuperNodes generator will generate a partial implementation of your script class that contains the contents of any PowerUps that have been applied to it, as well as an implementation of the `_Notification` method to hook into your node script's lifecycle events.
+
+To create a PowerUp, simply declare another class and give it the `[PowerUp]` attribute.
 
 ```csharp
-namespace MyProject;
+// SimpleExampleNode.cs — your node's script file.
 
 using Godot;
-using SuperNodes;
 
-[SuperNode]
-public partial class MySuperNode : Node {
-  // This line has to be included in every script that wants to be a SuperNode.
+[SuperNode(typeof(SimplePowerUp))]
+public partial class SimpleExampleNode : Node {
   public override partial void _Notification(int what);
-  
-  // ... rest of your script
+
+  public void OnReady() => SomeMethod();
+
+  public void OnProcess(double delta) => SomeMethod();
+
+  public void SomeMethod() {
+    if (LastNotification == NotificationReady) {
+      GD.Print("We are getting ready.");
+    }
+    else if (LastNotification == NotificationProcess) {
+      GD.Print("We are processing a frame.");
+    }
+  }
+}
+
+// A PowerUp that logs some of the main lifecycle events of a node.
+
+[PowerUp]
+public partial class SimplePowerUp : Node {
+  public long LastNotification { get; private set; }
+
+  public void OnSimplePowerUp(int what) {
+    switch ((long)what) {
+      case NotificationReady:
+        GD.Print("PowerUp is ready!");
+        break;
+      case NotificationEnterTree:
+        GD.Print("I'm in the tree!");
+        break;
+      case NotificationExitTree:
+        GD.Print("I'm out of the tree!");
+        break;
+      default:
+        break;
+    }
+    LastNotification = what;
+  }
 }
 ```
 
-The SuperNodes generator will inject the `[SuperNode]` attribute into the codebase, so don't worry if you get an error when you first try to use it. Once the source generators run, the error should go away.
+The `[SuperNode]` and `[PowerUp]` attributes are automatically injected into your codebase when the SuperNodes generator builds your project — typically while you're editing it in an IDE or whenever you run `dotnet build`.
 
-Your IDE will probably trigger the source generation automatically, but if it doesn't you can simply run `dotnet build`.
+For the `SimpleExampleNode` above, SuperNodes will generate a special implementation file at compile-time named `SimpleExampleNode_SimplePowerUp.g.cs` that looks something like the snippet below. Note how the contents of the PowerUp have been copied over into a partial implementation of the script the PowerUp was applied to.
 
-Under the hood, SuperNodes will generate an implementation for the Godot `_Notification` method, allowing it to observe the node's lifecycle events, such as `Ready`, `Process`, `EnterTree`, etc. You can still override the Godot version of those methods, but you can't implement `_Notification` yourself. For the full list of lifecycle handlers, [see below](#lifecycle-handlers).
+```csharp
+// SimpleExampleNode_SimplePowerUp.g.cs — generated PowerUp implementation.
+#nullable enable
+using Godot;
 
-Alternatively, SuperNodes will call any method you've defined that matches a Godot node or object notification and begins with the word `On`, such as `OnReady`, `OnProcess`, `OnWmMouseEnter`, `OnSceneInstantiated` etc. This allows you to easily and consistently define method signatures in C# idiomatically, if that's important to you.
+partial class SimpleExampleNode
+{
+  public long LastNotification { get; private set; }
+
+  public void OnSimplePowerUp(int what)
+  {
+    switch ((long)what)
+    {
+      case NotificationReady:
+        GD.Print("PowerUp is ready!");
+        break;
+      case NotificationEnterTree:
+        GD.Print("I'm in the tree!");
+        break;
+      case NotificationExitTree:
+        GD.Print("I'm out of the tree!");
+        break;
+      default:
+        break;
+    }
+
+    LastNotification = what;
+  }
+}
+#nullable disable
+```
+
+In addition, SuperNodes will also generate a `SimpleExampleNode.g.cs` file that contains an implementation of the partial `_Notification` method available on all Godot node scripts. By implementing this method, SuperNodes has the ability to monitor all lifecycle events the node receives, as well as call the PowerUp's `OnSimplePowerUp` method when the node receives a lifecycle event.
+
+```csharp
+// SimpleExampleNode.g.cs — generated script lifecycle implementation.
+#nullable enable
+using Godot;
+
+partial class SimpleExampleNode {
+  public override partial void _Notification(int what) {
+    // Invoke declared lifecycle method handlers.
+    OnSimplePowerUp(what);
+
+    // Invoke any notification handlers declared in the script.
+    switch ((long)what) {
+      case NotificationReady:
+        OnReady();
+        break;
+      case NotificationProcess:
+        OnProcess(GetProcessDeltaTime());
+        break;
+      default:
+        break;
+    }
+  }
+}
+#nullable disable
+```
+
+*By adding just two lines of boilerplate code to our node script* (the `[SuperNode]` attribute and the partial `_Notification` method declaration), **we have effectively mixed-in another class to our script** that has **full access to our node's lifecycle events**!
+
+SuperNodes can do a *lot* more than just that, however. Let's keep going!
+
+## 🔄 Lifecycle Handlers
+
+SuperNodes will always generate an implementation for the Godot `_Notification` method that your script declares, allowing it to observe the node's lifecycle events, such as `Ready`, `Process`, `EnterTree`, etc. You can still override the Godot version of those methods, such as `_Process`, `_EnterTree`, etc, but you can't implement `_Notification` yourself. Instead, SuperNodes will call any method named `OnNotification` in your script from `_Notification` that also receives the notification type as an argument.
+
+Instead of implementing lifecycle methods like `_Ready` or `_Process` yourself, you can let SuperNodes call any method you've defined that matches a Godot node or object notification and begins with the word `On`, such as `OnReady`, `OnProcess`, `OnWmMouseEnter`, `OnSceneInstantiated` etc. This allows you to easily and consistently define method signatures in C# idiomatically, if that's important to you. For the full list of lifecycle handlers, [see below](#🛟-full-list-of-lifecycle-handlers).
 
 > To view generated code in your project that's using source generators, include the following in your `.csproj` file:
 >
@@ -65,43 +186,36 @@ Alternatively, SuperNodes will call any method you've defined that matches a God
 > </PropertyGroup>
 > ```
 
-Just defining a SuperNode doesn't do much. Let's make it useful!
+## 🎰 Source Generators with Godot
 
-## 🎰 Using Compatible Source Generators
+Because of the way [Godot's own source generators are designed][godot-generator-problems], it's not easily possible to use multiple third-party source generators which want to observe a node's lifecycle events in harmony.
 
-As mentioned previously, SuperNodes can help you use multiple third-party source generators which want to observe a node's lifecycle events in harmony.
+SuperNodes makes it possible to use other source generators alongside it by letting you declare lifecycle methods that should be called from the implemented SuperNode's `_Notification` method.
+
+Essentially, SuperNodes makes it possible for other unofficial Godot source generators to [play nicely with each other and the official Godot source generators][godot-generator-problems].
 
 Suppose you want to use a source generator which prints out a message when your node is ready. We'll call this hypothetical source generator `PrintOnReady`.
 
 To tell SuperNodes about your generator, add `PrintOnReady` to the `[SuperNode]` attribute:
 
 ```csharp
-namespace MyProject;
-
 using Godot;
-using SuperNodes;
 
 [SuperNode("PrintOnReady")]
 public partial class MySuperNode : Node {
-  public override partial void _Notification( what);
-  
-  public void OnReady() {
-    GD.Print("PrintOnReady will have already printed out that I'm ready.");
-  }
-  // ...
+  public override partial void _Notification(int what);
+
+  public void OnReady()
+    => GD.Print("PrintOnReady will have already printed out that I'm ready.");
 }
 ```
 
-If the third party source generator wants to be compatible with SuperNodes, all it has to do is generate a partial implementation of your node's script class that contains a method named `PrintOnReady`. The `PrintOnReady` method will be called whenever `_Notification` is.
+If the `PrintOnReady` source generator wants to be compatible with SuperNodes, all it has to do is generate a partial implementation of your node's script class that contains a method named `PrintOnReady`. The `PrintOnReady` method will be called whenever `_Notification` is from the SuperNode's generated implementation.
 
 ```csharp
 // Hypothetical generated output of our imaginary PrintOnReady generator.
-namespace MyProject;
-
-using Godot;
-
 public partial class MySuperNode {
-  public void PrintOnReady( what) {
+  public void PrintOnReady(int what) {
     if (what == NotificationReady) {
       GD.Print($"{Name} is ready.");
     }
@@ -109,7 +223,7 @@ public partial class MySuperNode {
 }
 ```
 
-> If you're looking to make your source generator compatible with SuperNodes, simply name your generated notification lifecycle method the same name as your source generator so it's easy for users to add it to their nodes with the `[SuperNode]` attribute.
+> If you're looking to make your source generator compatible with SuperNodes, simply name your generated notification lifecycle method the same name as your source generator so that it's easy for users to add it to their nodes with the `[SuperNode]` attribute.
 >
 > If all of us source generator authors follow that convention, we can have a really good time — and nobody's source generators will conflict with anyone else's!
 
@@ -119,135 +233,313 @@ SuperNodes will itself generate another partial implementation which will call t
 #nullable enable
 using Godot;
 
-namespace MyProject
-{
-  public partial class MySuperNode
-  {
-    public override partial void _Notification( what)
-    {
-      // Invoke declared lifecycle method handlers from other generators.
-      PrintOnReady(what);
-      // Invoke any notification handlers declared in the script.
-      switch ((long)what)
-      {
-        case NotificationReady:
-          OnReady();
-          break;
-        default:
-          break;
-      }
+partial class MySuperNode {
+  public override partial void _Notification(int what) {
+    // Invoke declared lifecycle method handlers.
+    PrintOnReady(what);
+
+    // Invoke any notification handlers declared in the script.
+    switch ((long)what) {
+      case NotificationReady:
+        OnReady();
+        break;
+      default:
+        break;
     }
   }
 }
-#nullable disable
 ```
 
 ### Multiple Source Generators
 
-SuperNodes can invoke generated implementations for multiple source generators. Just put the names of the methods that should be called in the `[SuperNode]` attribute, like so:
+SuperNodes can invoke generated implementations for multiple source generators. Simply put the names of each method that should be called in the `[SuperNode]` attribute:
 
 ```csharp
-[SuperNode("GeneratedMethod1", "GeneratorMethod2")]
+[SuperNode("GeneratorOne", "GeneratorTwo")]
 public partial class MySuperNode : Node { /* ... */ }
 ```
 
-## 🔋 PowerUps
-
-If you can't find a source generator that meets your needs (and you can't be bothered to make your own), you can define "PowerUps" that can be applied to your SuperNodes.
-
-To make a PowerUp, make a Godot node subclass, mark it with the `[PowerUp]` attribute, and create a method with the signature `public void On{NameOfYourPowerUp}( what)`. The `OnMyPowerUp` method will be called from any generated SuperNodes implementations for SuperNodes that use this PowerUp, ensuring your PowerUp can respond to the node's lifecycle changes.
-
-> Like the `[SuperNode]` attribute, the `[PowerUp]` attribute is generated by `SuperNodes` and may not exist until your IDE runs the source generators next. If you want to force the source generators to execute, simply run `dotnet build` in your project.
-
-For example: here's a custom PowerUp which prints a message whenever it enters or exits the scene tree.
+You can also mix-and-match PowerUps and source generator method names. The order of invocations will be preserved.
 
 ```csharp
-namespace MyProject;
+[SuperNode("GeneratedMethod1", typeof(MyPowerUp), "GeneratorMethod2")]
+public partial class MySuperNode : Node { /* ... */ }
+```
 
-using Godot;
-using SuperNodes;
+The generated implementation will respect the order of invocations specified in the `[SuperNode]` attribute:
 
-[PowerUp]
-public partial class PrintOnTreePowerUp : Node {
-  public void OnPrintOnTreePowerUp( what) {
-    if (what == NotificationEnterTree) {
-      PrintOnTreePowerUpEnteredTree();
+```csharp
+partial class MySuperNode {
+  public override partial void _Notification(int what) {
+    // Invoke declared lifecycle method handlers.
+    GeneratedMethod1(what);
+    OnMyPowerUp(what);
+    GeneratorMethod2(what);
+
+    // Invoke any notification handlers declared in the script.
+    switch ((long)what) {
+      // ...
     }
-    else if (what == NotificationExitTree) {
-      PrintOnTreePowerUpExitedTree();
-    }
-  }
-
-  // Any custom methods or properties you define in your PowerUp will be
-  // copied into the SuperNode that uses it verbatim.
-  private void PrintOnTreePowerUpEnteredTree() {
-    GD.Print($"{Name} entered the tree.");
-  }
-
-  private void PrintOnTreePowerUpExitedTree() {
-    GD.Print($"{Name} exited the tree.");
   }
 }
 ```
 
-To apply a PowerUp to a SuperNode, add the name of the PowerUp to the `[SuperNode]` attribute's list. The node below is the same one as demonstrated above, but it uses both the `PrintOnReady` generator and our new `PrintOnTreePowerUp`:
+## 🧐 Okay, but how?
+
+The astute reader may have noticed that we added a property in our first example to our `SimpleExampleNode` named `LastNotification`, despite the fact that adding properties to existing classes is not supported by C#.
+
+How is this possible? Since SuperNodes is a source generator, it can examine both the SuperNode and the PowerUp at compile-time, create a copy of the PowerUp, edit it, and turn it into a specific partial implementation of the SuperNode, effectively simulating a [mixins] (for the most part). You might also know similar patterns from other languages, such as [traits], macros, static metaprogramming, or templates.
+
+> Wait: what about C#'s support for *default interface implementations*? Unfortunately, default interface implementations cannot be used to add instance data to a class. That is, you cannot add fields (and by extent auto properties) to an existing class using default interface implementations. Essentially, default interface implementations only allow you to implement missing methods, not add state.
+>
+> > Interfaces may not contain instance state. While static fields are now permitted, instance fields are not permitted in interfaces. Instance auto-properties are not supported in interfaces, as they would implicitly declare a hidden field. — Love, Microsoft
+>
+> If you'd like to know more about the limitations of default interface implementations, check out [this article][default-interfaces-limitations].
+
+## 💎 Mixins and Caveats
+
+If you apply two PowerUps to a node that both declare the same member, you will get a compile time error.
 
 ```csharp
-namespace MyProject;
-
-using Godot;
-using SuperNodes;
-
-[SuperNode("PrintOnReady", typeof(PrintOnTreePowerUp))]
-public partial class MySuperNode : Node {
-  public override partial void _Notification( what);
-  
-  public void OnReady() {
-    GD.Print("PrintOnReady will have already printed out that I'm ready.");
-  }
+[SuperNode(typeof(SimplePowerUp), typeof(ConflictingSimplePowerUp))]
+public partial class SimpleExampleNode : Node {
+  public override partial void _Notification(int what);
   // ...
 }
+
+[PowerUp]
+public partial class ConflictingSimplePowerUp : Node {
+  public long LastNotification { get; private set; }
+}
 ```
 
-SuperNodes will then generate a mixed-in partial implementation of your node's script class called `MySuperNode.PrintOnTreePowerUp.g.cs` that looks something like this:
+> `The type 'SimpleExampleNode' already contains a definition for 'LastNotification'`
+
+Once again, the clever reader may recognize this as the classic "diamond problem" from [multiple inheritance][multiple-inheritance]. There's no easy way for SuperNodes to resolve this, so our recommendation is to avoid this situation altogether by simply saying "don't apply conflicting PowerUps." If you're getting so fancy with PowerUps that you run into naming clashes, please reconsider your approach.
+
+> Generated mixins is big hammer to swing, so we recommend reserving PowerUps for systems that may apply to many scripts, such as serialization, dependency injection, logging, analytics, or integration with other components.
+
+That being said, C# does provide a way to resolve naming conflicts between interfaces through [explicit interface implementations][explicit-interface-implementations]. Unfortunately, using explicit interface implementation syntax in your scripts [breaks Godot's own source generators][explicit-interface-godot-bug] (at the time of this writing, anyways), so you can't use this technique to bypass naming conflicts.
+
+## 🪫 Supercharging PowerUps
+
+If you can't find a source generator that meets your needs (and you can't be bothered to make your own), you might be able to create a PowerUp that does what you want. While PowerUps can't replace source generators, they do offer a number of features that can make advanced use cases easier to implement.
+
+In short, PowerUps can:
+
+- ✅ Add instance data to your scripts.
+- ✅ Receive generic type parameters.
+- ✅ Apply implemented interfaces.
+- ✅ Constrain the types of SuperNodes they can be applied to.
+- ✅ Inspect and manipulate all of the fields and properties on a SuperNode at runtime — without using reflection!
+
+### 🪩 Static Reflection
+
+The SuperNodes generator has a secret trick: it will generate a table of all the fields and properties of each SuperNode script at compile-time, including the fields and properties that come from PowerUps it has applied.
+
+Let's take a look at a SuperNode with a PowerUp that inspects its own fields and properties:
+
+```csharp
+namespace IntrospectiveExample;
+
+using System.Collections.Immutable;
+using System.Linq;
+using Godot;
+
+[SuperNode(typeof(IntrospectivePowerUp))]
+public partial class IntrospectiveNode : Node2D {
+  public override partial void _Notification(int what);
+
+  [Export(PropertyHint.MultilineText)]
+  public string MyDescription { get; set; } = nameof(IntrospectiveNode);
+}
+
+[PowerUp]
+public abstract partial class IntrospectivePowerUp : Node {
+  // These stubs are equivalent to the static reflection utilities that
+  // the SuperNodes generator will create. We mark them with [PowerUpIgnore] to
+  // prevent them from being copied to the SuperNode this PowerUp is applied to.
+
+  [PowerUpIgnore]
+  internal static ImmutableDictionary<string, ScriptPropertyOrField>
+    PropertiesAndFields =
+      ImmutableDictionary<string, ScriptPropertyOrField>.Empty;
+
+  [PowerUpIgnore]
+  internal abstract TResult GetScriptPropertyOrFieldType<TResult>(
+    string scriptProperty, ITypeReceiver<TResult> receiver
+  );
+
+  [PowerUpIgnore]
+  internal abstract dynamic GetScriptPropertyOrField(string scriptProperty);
+
+  [PowerUpIgnore]
+  internal abstract void SetScriptPropertyOrField(
+    string scriptProperty, dynamic value
+  );
+
+  // A type receiver which checks the type of a value when the reified type
+  // is given to its Receive method.
+  //
+  // Note that ITypeReceiver is generated by SuperNodes.
+  private class CheckValueType : ITypeReceiver<bool> {
+    public dynamic Value { get; }
+
+    public CheckValueType(dynamic value) {
+      Value = value;
+    }
+
+    public bool Receive<T>() => Value is T;
+  }
+
+  public void OnIntrospectivePowerUp(int what) {
+    if (what == NotificationReady) {
+      var numberOfPropsAndFields = PropertiesAndFields.Count;
+      GD.Print($"I have {numberOfPropsAndFields} properties and fields.");
+
+      if (numberOfPropsAndFields > 0) {
+        var prop = PropertiesAndFields.First();
+        var myData = "hello, world"!;
+        var myDataIsSameTypeAsProp = GetScriptPropertyOrFieldType(
+          prop.Key, new CheckValueType(myData)
+        );
+      }
+    }
+  }
+}
+```
+
+> The `IntrospectivePowerUp` has to declare static "stubs" that correspond to each generated reflection property or method created by the SuperNodes generator so that it will successfully compile. These stubs are marked with the `[PowerUpIgnore]` attribute to prevent them from being copied over into the SuperNode that the PowerUp is applied to. If they weren't ignored, you'd end up with a duplicate definition error.
+
+The SuperNodes generator will produce an implementation for `IntrospectiveNode` containing static information about each property or field in the SuperNode, as well as utility methods for getting and setting values (for readable members and writable members, respectively).
 
 ```csharp
 #nullable enable
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Godot;
-using MyPowerUps;
 
-namespace MyProject
-{
-  public partial class MySuperNode
-  {
-    public void OnPrintOnTreePowerUp( what)
-    {
-      if (what == NotificationEnterTree)
-      {
-        PrintOnTreePowerUpEnteredTree();
-      }
-      else if (what == NotificationExitTree)
-      {
-        PrintOnTreePowerUpExitedTree();
+namespace IntrospectiveExample {
+  partial class IntrospectiveNode {
+    /// <summary>
+    /// A list of all properties and fields on this node script, along with
+    /// basic information about the member and its attributes.
+    /// This is provided to allow PowerUps to access script member data
+    /// without having to resort to reflection.
+    /// </summary>
+    internal static ImmutableDictionary<string, ScriptPropertyOrField> PropertiesAndFields { get; }
+      = new Dictionary<string, ScriptPropertyOrField>() {
+      ["MyDescription"] = new ScriptPropertyOrField(
+        "MyDescription",
+        typeof(string),
+        false,
+        true,
+        true,
+        new Dictionary<string, ScriptAttributeDescription>() {
+          ["global::Godot.ExportAttribute"] =
+            new ScriptAttributeDescription(
+              "ExportAttribute",
+              typeof(global::Godot.ExportAttribute),
+              ImmutableArray.Create<dynamic>(
+                Godot.PropertyHint.MultilineText,
+                ""
+              )
+            )
+        }.ToImmutableDictionary()
+      )
+      }.ToImmutableDictionary();
+
+    /// <summary>
+    /// Calls the given type receiver with the generic type of the given
+    /// script property or field. Generated by SuperNodes.
+    /// </summary>
+    /// <typeparam name="TResult">The return type of the type receiver's
+    /// receive method.</typeparam>
+    /// <param name="scriptProperty">The name of the script property or field
+    /// to get the type of.</param>
+    /// <param name="receiver">The type receiver to call with the type
+    /// of the script property or field.</param>
+    /// <returns>The result of the type receiver's receive method.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the given script
+    /// property or field does not exist.</exception>
+    internal static TResult GetScriptPropertyOrFieldType<TResult>(
+      string scriptProperty, ITypeReceiver<TResult> receiver
+    ) {
+      switch (scriptProperty) {
+        case "MyDescription":
+          return receiver.Receive<string>();
+        default:
+          throw new System.ArgumentException(
+            $"No field or property named '{scriptProperty}' was found on IntrospectiveNode."
+          );
       }
     }
 
-    // Any custom methods or properties you define in your power-up will be
-    // copied into the SuperNode that uses it verbatim.
-    private void PrintOnTreePowerUpEnteredTree() {
-      GD.Print($"{Name} entered the tree.");
+    /// <summary>
+    /// Gets the value of the given script property or field. Generated by
+    /// SuperNodes.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the script property or
+    /// field to get the value of.</typeparam>
+    /// <param name="scriptProperty">The name of the script property or
+    /// field to get the value of.</param>
+    /// <returns>The value of the script property or field.</returns>
+    /// <exception cref="System.ArgumentException">Thrown if the given
+    /// script property or field does not exist.</exception>
+    internal dynamic GetScriptPropertyOrField(
+      string scriptProperty
+    ) {
+      switch (scriptProperty) {
+        case "MyDescription":
+          return MyDescription;
+        default:
+          throw new System.ArgumentException(
+            $"No field or property named '{scriptProperty}' was found on IntrospectiveNode."
+          );
+      }
     }
-    private void PrintOnTreePowerUpExitedTree() {
-      GD.Print($"{Name} exited the tree.");
+
+    /// <summary>
+    /// Sets the value of the given script property or field. Generated by
+    /// SuperNodes.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the script property or
+    /// field to set the value of.</typeparam>
+    /// <param name="scriptProperty">The name of the script property or
+    /// field to set the value of.</param>
+    /// <param name="value">The value to set the script property or
+    /// field to.</param>
+    /// <exception cref="System.ArgumentException">Thrown if the given
+    /// script property or field does not exist.</exception>
+    internal void SetScriptPropertyOrField(
+      string scriptProperty, dynamic value
+    ) {
+      switch (scriptProperty) {
+        case "MyDescription":
+          MyDescription = value;
+          break;
+        default:
+          throw new System.ArgumentException(
+            $"No field or property named '{scriptProperty}' was found on IntrospectiveNode."
+          );
+      }
     }
   }
 }
 #nullable disable
 ```
 
-The code from the PowerUp is essentially duplicated exactly, but the class is changed to be a partial implementation of the script that the PowerUp is applied to. Anything inside the PowerUp will get copied over exactly.
+### Accessing Attributes on Properties and Fields
 
-Any namespaces your PowerUp defines in its file will also get copied over.
+The `PropertiesAndFields` dictionary contains a `ScriptPropertyOrField` object for each property or field in the SuperNode. This object contains information about the member, including its name, type, readability, mutability, and attributes (as well as their arguments). Accessing member attributes opens the door for custom serialization systems, member initialization, or anything else you can dream up!
+
+### Accessing Types
+
+The `GetScriptPropertyOrFieldType` is a special utility that will call an `ITypeReceiver` object with the type of a script property or field as a generic type parameter. In certain situations, having access to the generic type parameter of a type is extremely useful for invoking other methods that may expect that type. Typically, converting a `Type` object into a type parameter [requires reflection or code generation at runtime][generic-types-reflection].
+
+### Getting and Setting Values
 
 ## 🛑 PowerUp Constraints
 
@@ -287,7 +579,7 @@ SuperNodes will perform invocations in the following order:
 - `OnOtherPowerUp` from the mixed-in `OtherPowerUp`
 - Any defined script handlers, such as `OnReady`, `OnProcess`, etc.
 
-## Lifecycle Handlers
+## 🛟 Full List of Lifecycle Handlers
 
 The following list contains every possible lifecycle handlers you can implement in your SuperNode. Each one corresponds to a `Notification` type found in `Godot.Node` or `Godot.Object`.
 
@@ -359,198 +651,6 @@ public partial class MySuperNode : Node2D { /* .. */ }
 
 /// SuperNodes will generate a partial implementation of MySuperNode in
 /// MySuperNode.MyPowerUp.g.cs that makes MySuperNode implement IMyInterface.
-```
-
-### 🪞 Static Reflection Lookups
-
-SuperNodes generates static reflection tables for fields and properties in node scripts (and applied PowerUps). PowerUps can reference these tables in their lifecycle handler to enumerate all fields and properties on a SuperNode and automatically perform initialization or inspection, depending on what is needed.
-
-For example, the following code includes a Node script named `MyNode` that has various properties and fields with attributes applied to them.
-
-```csharp
-    namespace MyNamespace;
-
-    using System;
-    using Godot;
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class ExampleAttribute : Attribute {
-      public string A { get; }
-      public int B { get; }
-      public bool C { get; }
-      public ExampleAttribute(string a = "", int b = 0, bool c = false) {
-        A = a;
-        B = b;
-        C = c;
-      }
-    }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class PlainExampleAttribute : Attribute { }
-
-    [SuperNode]
-    public partial class MyNode : Node {
-      public override partial void _Notification( what);
-
-      [Example(c: true)]
-      public string PropertyA { get; set; } = "hello, world!";
-
-      [Example("hello", 1, true)]
-      public int PropertyB { get; set; } = 1;
-
-      [PlainExample]
-      public int PropertyC { get; set; } = 1;
-
-      private float _fieldA = 1.0f;
-
-      [Example(b: 1, c: true)]
-      private float _fieldB = 1.0f;
-
-      [PlainExample]
-      private float _fieldC = 1.0f;
-
-      public void OnReady() { }
-
-      public void OnProcess(double delta) { }
-    }
-```
-
-SuperNodes will generate a static reflection table implementation named something like `MyNamespace.MyNode_Static.g.cs` with the following static properties:
-
-```csharp
-#nullable enable
-using Godot;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-
-namespace MyNamespace {
-  partial class MyNode {
-    /// <summary>
-    /// A list of all properties and fields on this node script, along with
-    /// basic information about the member and its attributes.
-    /// This is provided to allow PowerUps to access script member data
-    /// without having to resort to reflection.
-    /// </summary>
-    internal static ScriptPropertyOrField[] PropertiesAndFields
-    = new ScriptPropertyOrField[] {
-      new ScriptPropertyOrField(
-        "_fieldA",
-        typeof(float),
-        new Dictionary<string, ScriptAttributeDescription>()
-      ),
-      new ScriptPropertyOrField(
-        "_fieldB",
-        typeof(float),
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::MyNamespace.ExampleAttribute"] =
-            new ScriptAttributeDescription(
-              "ExampleAttribute",
-              typeof(global::MyNamespace.ExampleAttribute),
-              ImmutableArray.Create<dynamic>(
-                "",
-                1,
-                true
-              )
-            )
-        }.ToImmutableDictionary()
-      ),
-      new ScriptPropertyOrField(
-        "_fieldC",
-        typeof(float),
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::MyNamespace.PlainExampleAttribute"] =
-            new ScriptAttributeDescription(
-              "PlainExampleAttribute",
-              typeof(global::MyNamespace.PlainExampleAttribute),
-              Array.Empty<dynamic>().ToImmutableArray()
-            )
-        }.ToImmutableDictionary()
-      ),
-      new ScriptPropertyOrField(
-        "PropertyA",
-        typeof(string),
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::MyNamespace.ExampleAttribute"] =
-            new ScriptAttributeDescription(
-              "ExampleAttribute",
-              typeof(global::MyNamespace.ExampleAttribute),
-              ImmutableArray.Create<dynamic>(
-                "",
-                0,
-                true
-              )
-            )
-        }.ToImmutableDictionary()
-      ),
-      new ScriptPropertyOrField(
-        "PropertyB",
-        typeof(int),
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::MyNamespace.ExampleAttribute"] =
-            new ScriptAttributeDescription(
-              "ExampleAttribute",
-              typeof(global::MyNamespace.ExampleAttribute),
-              ImmutableArray.Create<dynamic>(
-                "hello",
-                1,
-                true
-              )
-            )
-        }.ToImmutableDictionary()
-      ),
-      new ScriptPropertyOrField(
-        "PropertyC",
-        typeof(int),
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::MyNamespace.PlainExampleAttribute"] =
-            new ScriptAttributeDescription(
-              "PlainExampleAttribute",
-              typeof(global::MyNamespace.PlainExampleAttribute),
-              Array.Empty<dynamic>().ToImmutableArray()
-            )
-        }.ToImmutableDictionary()
-      )
-    };
-
-    /// <summary>
-    /// Calls the given type receiver with the generic type of the given
-    /// script property or field. Generated by SuperNodes.
-    /// </summary>
-    /// <typeparam name="TResult">The return type of the type receiver's
-    /// receive method.</typeparam>
-    /// <param name="scriptProperty">The name of the script property or field
-    /// to get the type of.</param>
-    /// <param name="receiver">The type receiver to call with the type
-    /// of the script property or field.</param>
-    /// <returns>The result of the type receiver's receive method.</returns>
-    /// <exception cref="System.ArgumentException">Thrown if the given script
-    /// property or field does not exist.</exception>
-    internal static TResult GetScriptPropertyOrFieldType<TResult>(
-      string scriptProperty, ITypeReceiver<TResult> receiver
-    ) {
-      switch (scriptProperty) {
-        case "_fieldA":
-          return receiver.Receive<float>();
-        case "_fieldB":
-          return receiver.Receive<float>();
-        case "_fieldC":
-          return receiver.Receive<float>();
-        case "PropertyA":
-          return receiver.Receive<string>();
-        case "PropertyB":
-          return receiver.Receive<int>();
-        case "PropertyC":
-          return receiver.Receive<int>();
-        default:
-          throw new System.ArgumentException(
-            $"No field or property named '{scriptProperty}' was found on MyNode."
-          );
-      }
-    }
-  }
-}
-#nullable disable
 ```
 
 ### 🔌 Sharing PowerUps in Separate Packages
@@ -634,5 +734,14 @@ Special thanks to those in the Godot and Chickensoft Discord Servers for supplyi
 
 <!-- Content -->
 [godot-generator-problems]: https://github.com/godotengine/godot/issues/66597
-[default-interfaces]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/default-interface-methods
 [generators]: https://github.com/amis92/csharp-source-generators
+[default-interfaces]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/default-interface-methods
+[default-interfaces-limitations]: https://jeremybytes.blogspot.com/2019/09/c-8-interfaces-properties-and-default.html
+[mixins]: https://en.wikipedia.org/wiki/Mixin
+[traits]: https://en.wikipedia.org/wiki/Trait_(computer_programming)
+[templates]: https://en.wikipedia.org/wiki/Template_(C++)
+[macros]: https://en.wikipedia.org/wiki/Macro_(computer_science)
+[multiple-inheritance]: https://en.wikipedia.org/wiki/Multiple_inheritance
+[explicit-interface-implementations]: https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/interfaces/explicit-interface-implementation
+[explicit-interface-godot-bug]: https://github.com/godotengine/godot/issues/74093
+[generic-types-reflection]: https://learn.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/how-to-examine-and-instantiate-generic-types-with-reflection

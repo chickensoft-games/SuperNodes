@@ -12,28 +12,31 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <Title>SuperNodes</Title>
+    <Version>1.0.0</Version>
     <Description>Supercharge your Godot nodes with lifecycle-aware mixins, third party source generators, script introspection, and dynamic property manipulation — all without runtime reflection!</Description>
     <Copyright>© 2023 Chickensoft Games</Copyright>
+    <Authors>Chickensoft</Authors>
     <Company>Chickensoft</Company>
 
     <PackageId>Chickensoft.SuperNodes</PackageId>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>0.2.0-beta</PackageVersion>
     <PackageReleaseNotes>SuperNodes release.</PackageReleaseNotes>
-    <PackageIcon></PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Source
       Generator;Generator;Godot 4;Nodes</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>git@github.com:chickensoft-games/SuperNodes.git</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/chickensoft-games/SuperNodes</RepositoryUrl>
+    <RepositoryUrl>https://github.com/chickensoft-games/SuperNodes.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Has to be in its own item group -->
-    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+    <None Include="../LICENSE" Pack="true" PackagePath="\" />
+    <None Include="./icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <!-- The following libraries include the source generator interfaces and types we need -->

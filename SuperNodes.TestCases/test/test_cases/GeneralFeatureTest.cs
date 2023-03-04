@@ -1,6 +1,7 @@
-namespace Test;
+namespace SuperNodes.TestCases;
 
 using Godot;
+using SuperNodes.Types;
 
 [SuperNode(typeof(GeneralFeaturePowerUp<int>), "OtherGenerator")]
 public partial class GeneralFeatureSuperNode : Node {

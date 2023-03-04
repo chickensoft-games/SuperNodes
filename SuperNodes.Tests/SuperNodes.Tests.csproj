@@ -30,7 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SuperNodes\Chickensoft.SuperNodes.csproj" />
+    <ProjectReference Include="../SuperNodes/Chickensoft.SuperNodes.csproj" />
+    <ProjectReference Include="../SuperNodes.Types/Chickensoft.SuperNodes.Types.csproj" />
   </ItemGroup>
 
 </Project>

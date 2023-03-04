@@ -23,6 +23,7 @@ public class SuperNodesGeneratorTest {
     namespace Test;
 
     using Godot;
+    using SuperNodes.Types;
 
     [SuperNode(typeof(GeneralFeaturePowerUp<int>), "OtherGenerator")]
     public partial class GeneralFeatureSuperNode : Node {
@@ -49,7 +50,7 @@ public class SuperNodesGeneratorTest {
     var result = Tester.Generate(source);
 
     result.Diagnostics.ShouldBeEmpty();
-    result.Outputs.Count.ShouldBe(8);
+    result.Outputs.Count.ShouldBe(3);
   }
 
   [Fact]
@@ -58,6 +59,7 @@ public class SuperNodesGeneratorTest {
     namespace Test;
 
     using Godot;
+    using SuperNodes.Types;
 
     [SuperNode(typeof(GeneralFeaturePowerUp<int>), "OtherGenerator")]
     public partial class GeneralFeatureSuperNode : Node {
@@ -95,6 +97,7 @@ public class SuperNodesGeneratorTest {
     namespace Test;
 
     using Godot;
+    using SuperNodes.Types;
 
     [SuperNode(typeof(GeneralFeaturePowerUp<int>), "OtherGenerator")]
     public partial class GeneralFeatureSuperNode : Node3D {

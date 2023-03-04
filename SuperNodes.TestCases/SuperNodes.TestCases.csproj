@@ -25,6 +25,8 @@
     <!-- LightMoq is a Chickensoft package which makes it more like Moq. -->
     <PackageReference Include="LightMoq" Version="0.1.0" />
     <!-- Include SuperNodes as a Source Generator for test cases-->
-    <ProjectReference Include="..\SuperNodes\Chickensoft.SuperNodes.csproj" PrivateAssets="all" OutputItemType="analyzer" />
+    <ProjectReference Include="../SuperNodes/Chickensoft.SuperNodes.csproj" PrivateAssets="all" OutputItemType="analyzer" />
+    <!-- When using SuperNodes, you have to include the runtime types as well. -->
+    <ProjectReference Include="../SuperNodes.Types/Chickensoft.SuperNodes.Types.csproj" />
   </ItemGroup>
 </Project>
