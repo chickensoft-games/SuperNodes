@@ -188,24 +188,46 @@ public static class NodeExtensions {
   /// <exception cref = "InvalidOperationException">Thrown if an unrecognized
   /// primitive type is encountered.</exception>
   /// <returns>Simple name of the type (or it's built-in type).</returns>
-  public static string TypeParam(this Node node, Type type)
-    => type.FullName switch {
-      "System.Boolean" => "bool",
-      "System.Byte" => "byte",
-      "System.SByte" => "sbyte",
-      "System.Char" => "char",
-      "System.Decimal" => "decimal",
-      "System.Double" => "double",
-      "System.Single" => "float",
-      "System.Int32" => "int",
-      "System.UInt32" => "uint",
-      "System.UIntPtr" => "nuint",
-      "System.Int64" => "long",
-      "System.UInt64" => "ulong",
-      "System.Int16" => "short",
-      "System.UInt16" => "ushort",
-      "System.Object" => "object",
-      "System.String" => "string",
-      _ => type.FullName ?? type.Name
-    };
+  public static string TypeParam(this Node node, Type type) {
+    var fullName = type.FullName;
+    switch (fullName) {
+      case "System.Boolean":
+        return "bool";
+      case "System.Byte":
+        return "byte";
+      case "System.SByte":
+        return "sbyte";
+      case "System.Char":
+        return "char";
+      case "System.Decimal":
+        return "decimal";
+      case "System.Double":
+        return "double";
+      case "System.Single":
+        return "float";
+      case "System.Int32":
+        return "int";
+      case "System.UInt32":
+        return "uint";
+      case "System.UIntPtr":
+        return "nuint";
+      case "System.Int64":
+        return "long";
+      case "System.UInt64":
+        return "ulong";
+      case "System.Int16":
+        return "short";
+      case "System.UInt16":
+        return "ushort";
+      case "System.Object":
+        return "object";
+      case "System.String":
+        return "string";
+      default:
+        if (fullName is null) {
+          return type.Name;
+        }
+        return "global::" + type.FullName;
+    }
+  }
 }

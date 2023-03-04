@@ -7,8 +7,10 @@ using GoDotTest;
 using Shouldly;
 using SuperNodes.Types;
 
+public class MyModel { }
+
 // SuperNode that applies a generic PowerUp.
-[SuperNode(typeof(GenericPowerUp<string, bool>))]
+[SuperNode(typeof(GenericPowerUp<string, MyModel>))]
 public partial class GenericPowerUpNode : Node {
   public override partial void _Notification(int what);
 }
@@ -93,10 +95,10 @@ public class GenericPowerUpTest : TestClass {
   [Test]
   public void GenericPowerUpWorks() {
     var node = new GenericPowerUpNode();
-    var generic = (IGenericPowerUp<string, bool>)node;
+    var generic = (IGenericPowerUp<string, MyModel>)node;
     var other = (IOtherInterface<string>)node;
     generic.A = "Hello";
-    generic.B = true;
+    generic.B = new MyModel();
     other.A = "World!";
     generic.A.ShouldBe("Hello");
     other.A.ShouldBe("World!");

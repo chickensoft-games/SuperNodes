@@ -86,7 +86,7 @@ public class NodeExtensionsTest {
     NodeExtensions.TypeParam(default!, typeof(ushort)).ShouldBe("ushort");
     NodeExtensions.TypeParam(default!, typeof(object)).ShouldBe("object");
     NodeExtensions.TypeParam(default!, typeof(TestAttribute))
-      .ShouldBe("SuperNodes.Types.Tests.TestAttribute");
+      .ShouldBe("global::SuperNodes.Types.Tests.TestAttribute");
     NodeExtensions.TypeParam(default!, new TestType())
       .ShouldBe(nameof(TestType));
   }
