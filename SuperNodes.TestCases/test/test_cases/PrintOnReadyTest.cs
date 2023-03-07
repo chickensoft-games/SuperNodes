@@ -1,4 +1,4 @@
-namespace SuperNodes.TestCases;
+namespace SimpleExample;
 
 using Godot;
 using SuperNodes.Types;

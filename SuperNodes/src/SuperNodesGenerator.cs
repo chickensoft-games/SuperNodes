@@ -27,9 +27,9 @@ public partial class SuperNodesGenerator
   public IPowerUpGenerator PowerUpGenerator { get; }
   public static Log Log { get; } = new Log();
 
-#pragma warning disable IDE0052
+#pragma warning disable IDE0052, CS0414
   private static bool _logsFlushed;
-#pragma warning restore IDE0052
+#pragma warning restore CS0414, IDE0052
 
   /// <summary>
   /// Parameterless constructor used by the .NET SDK tooling.

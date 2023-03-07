@@ -226,38 +226,66 @@ public class SuperNodeGeneratorService
       fields.Add($"{Tab(2)}{propOrField.IsField.ToString().ToLower()},");
       fields.Add($"{Tab(2)}{propOrField.IsMutable.ToString().ToLower()},");
       fields.Add($"{Tab(2)}{propOrField.IsReadable.ToString().ToLower()},");
-      var attributes = propOrField.Attributes;
-      if (attributes.Length > 0) {
-        fields.Add(
-          $"{Tab(2)}new Dictionary<string, ScriptAttributeDescription>() {{"
+
+      // Convert attributes into a
+      // Dictionary<string, ImmutableArray<ScriptAttributeDescription>>
+      // where the key is the attribute type and the value is an array of
+      // ScriptAttributeDescriptions
+      var attributes = propOrField.Attributes
+        .GroupBy(attr => attr.Type)
+        .ToDictionary(
+          group => group.Key,
+            group => group.Select(attr => new AttributeDescription(
+              Name: attr.Name,
+              Type: attr.Type,
+              ArgumentExpressions: attr.ArgumentExpressions
+          )).ToImmutableArray()
         );
-        foreach (var attribute in attributes) {
-          var attrComma = attribute == attributes.Last() ? "" : ",";
-          fields.Add($"{Tab(3)}[\"{attribute.Type}\"] =");
-          fields.Add($"{Tab(4)}new ScriptAttributeDescription(");
-          fields.Add($"{Tab(5)}\"{attribute.Name}\",");
-          fields.Add($"{Tab(5)}typeof({attribute.Type}),");
-          var args = attribute.ArgumentExpressions;
-          if (args.Length > 0) {
-            fields.Add($"{Tab(5)}ImmutableArray.Create<dynamic>(");
-            foreach (var arg in args) {
-              var argComma
-                = arg == attribute.ArgumentExpressions.Last() ? "" : ",";
-              fields.Add(Tab(6) + arg + argComma);
-            }
-            fields.Add($"{Tab(5)})");
+
+      if (attributes.Count > 0) {
+        fields.Add(
+          $"{Tab(2)}new Dictionary<string, " +
+          "ImmutableArray<ScriptAttributeDescription>>() {"
+        );
+
+        var attrTypes = attributes.Keys.ToArray();
+
+        for (var attrI = 0; attrI < attrTypes.Length; attrI++) {
+          var attrType = attrTypes[attrI];
+          var attrComma = attrI == attrTypes.Length - 1 ? "" : ",";
+          fields.Add(
+            $"{Tab(3)}[\"{attrType}\"] = new ScriptAttributeDescription[] {{"
+          );
+          var attrDescriptions = attributes[attrType];
+          for (var descI = 0; descI < attrDescriptions.Length; descI++) {
+            var attrDesc = attrDescriptions[descI];
+            var descComma = descI == attrDescriptions.Length - 1 ? "" : ",";
+            var argumentExpressions = attrDesc.ArgumentExpressions.IsEmpty
+              ? new string[] { $"{Tab(5)}ImmutableArray<dynamic>.Empty" }
+              : new string[] {
+                $"{Tab(5)}new dynamic[] {{",
+                $"{Tab(6)}{string.Join(", ", attrDesc.ArgumentExpressions)},",
+                $"{Tab(5)}}}.ToImmutableArray()"
+              };
+            fields.AddRange(new string[] {
+              $"{Tab(4)}new ScriptAttributeDescription(",
+              $"{Tab(5)}\"{attrDesc.Name}\",",
+              $"{Tab(5)}typeof({attrDesc.Type}),",
+            });
+            fields.AddRange(argumentExpressions);
+            fields.Add($"{Tab(4)}){descComma}");
           }
-          else {
-            fields.Add($"{Tab(5)}Array.Empty<dynamic>().ToImmutableArray()");
-          }
-          fields.Add($"{Tab(4)}){attrComma}");
+          fields.Add($"{Tab(3)}}}.ToImmutableArray(){attrComma}");
         }
-        fields.Add($"{Tab(2)}}}.ToImmutableDictionary()");
+
+        fields.Add(
+          $"{Tab(2)}}}.ToImmutableDictionary()"
+        );
       }
       else {
         fields.Add(
           $"{Tab(2)}ImmutableDictionary<string, " +
-            "ScriptAttributeDescription>.Empty"
+            "ImmutableArray<ScriptAttributeDescription>>.Empty"
         );
       }
       fields.Add($"{Tab(1)}){propComma}");

@@ -1,10 +1,10 @@
-namespace SuperNodes.TestCases;
+namespace SimpleExample;
 
 using Godot;
 using SuperNodes.Types;
 
-[SuperNode(typeof(SimplePowerUp))]
-public partial class SimpleExampleNode : Node {
+[SuperNode(typeof(ExamplePowerUp))]
+public partial class ExampleNode : Node {
   public override partial void _Notification(int what);
 
   public void OnReady() => SomeMethod();
@@ -14,20 +14,20 @@ public partial class SimpleExampleNode : Node {
   public void SomeMethod() {
     var d = GetProcessDeltaTime();
     if (LastNotification == NotificationReady) {
-      GD.Print("We are getting ready.");
+      GD.Print("We were getting ready.");
     }
     else if (LastNotification == NotificationProcess) {
-      GD.Print("We are processing a frame.");
+      GD.Print("We were processing a frame.");
     }
   }
 }
 
 // A PowerUp that logs some of the main lifecycle events of a node.
 [PowerUp]
-public partial class SimplePowerUp : Node {
+public partial class ExamplePowerUp : Node {
   public long LastNotification { get; private set; }
 
-  public void OnSimplePowerUp(int what) {
+  public void OnExamplePowerUp(int what) {
     switch ((long)what) {
       case NotificationReady:
         GD.Print("PowerUp is ready!");

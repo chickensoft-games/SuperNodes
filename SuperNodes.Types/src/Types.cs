@@ -10,7 +10,7 @@ using Godot;
 /// functionality from other compatible source generators.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class SuperNodeAttribute : Attribute {
+public sealed class SuperNodeAttribute : Attribute {
   /// <summary>
   /// Source generator lifecycle methods and/or PowerUps to invoke from
   /// <see cref="GodotObject._Notification(int what)" />.
@@ -45,7 +45,7 @@ public class SuperNodeAttribute : Attribute {
 /// Power-up attribute. Add this to a class to create a mixin.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class PowerUpAttribute : Attribute {
+public sealed class PowerUpAttribute : Attribute {
   /// <summary>PowerUp attribute. Add this to a class to create a mixin.
   /// </summary>
   public PowerUpAttribute() { }
@@ -56,7 +56,7 @@ public class PowerUpAttribute : Attribute {
 /// SuperNode the PowerUp is applied to.
 /// </summary>
 [AttributeUsage(AttributeTargets.All)]
-public class PowerUpIgnoreAttribute : Attribute {
+public sealed class PowerUpIgnoreAttribute : Attribute {
   /// <summary>
   /// Place on PowerUp members to prevent them from being copied to the
   /// SuperNode the PowerUp is applied to.
@@ -117,7 +117,7 @@ public record struct ScriptPropertyOrField(
   bool IsField,
   bool IsMutable,
   bool IsReadable,
-  IDictionary<string, ScriptAttributeDescription> Attributes
+  IDictionary<string, ImmutableArray<ScriptAttributeDescription>> Attributes
 );
 
 public interface ISuperNode {

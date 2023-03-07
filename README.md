@@ -2,6 +2,8 @@
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord][discord-badge]][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
+SuperNodes is a C# source generator that gives superpowers to Godot node scripts.
+
 ---
 
 <p align="center">
@@ -12,28 +14,35 @@
 
 ---
 
-SuperNodes is a source generator that helps give superpowers to C# scripts on Godot nodes.
-
-- ✅ Apply PowerUps (i.e, mixin other classes) to your scripts that add instance data — you are no longer limited to only adding methods via default interface implementations!
-- ✅ Call lifecycle-aware generated methods from other compatible third-party source generators. Because of the way Godot's official source generators work, it's hard to use multiple source generators that want to observe a node's lifecycle events. SuperNodes solves this problem by providing a mechanism for third-party source generators to hook into the node's lifecycle events.
+- ✅ Apply PowerUps (essentially mixins for C#) to your node scripts.
+- ✅ Use third-party source generators alongside Godot's official source generators.
 - ✅ Minimal boilerplate — just two additional lines of code.
-- ✅ Inspect script properties and fields (including their attributes) during execution using generated tables — no runtime reflection required!
-- ✅ Get and set the value of script properties and fields via their string name at runtime.
-- ✅ Receive the type of a script property or field at runtime as a reified type (i.e., as a type parameter).
-- ✅ No runtime reflection — PowerUps and static reflection tables are generated at compile-time.
-- ✅ Compatible with source-only nuget packages. The included `SharedPowerUps` example describes how to create and consume a source-code only package. Source-only packages are added directly as source code into the project that references them, allowing the source generators in that project to read the included source code as if it had been written in the project itself. This is useful for creating PowerUps that are shared across multiple projects.
-- ✅ Well tested. SuperNodes has 100% line and branch coverage from unit tests, as well as a suite of test cases for fixing bugs, regressions, and integration testing in real-world scenarios. If you find an issue, let us know and we'll get it fixed. It's very important to us to provide good support and ensure SuperNodes is both stable and reliable.
+- ✅ Get and set the value of script properties and fields without reflection.
+- ✅ Inspect the attributes and types of script properties and fields without reflection.
+- ✅ Compatible with source-only nuget packages.
+- ✅ Inspect SuperNodes across assemblies using the shared runtime types.
+- ✅ 100% code coverage. Contact us in Discord if you find a problem!
 
 ## 📦 Installation
 
-Simply add SuperNodes as an analyzer dependency to your C# project.
+Find the latest version on [Nuget][nuget]! Note the version number and add the following to your project's `.csproj` file, replacing `{VERSION}` with whatever compatible version you need from Nuget.
+
+> 💡 Because SuperNodes is a source generator, you have to include the `PrivateAssets="all" OutputItemType="analyzer"` to tell the build system how to use it.
 
 ```xml
 <ItemGroup>
   <!-- Include SuperNodes as a Source Generator -->
-  <PackageReference Include="Chickensoft.SuperNodes" Version="{LATEST_VERSION}" PrivateAssets="all" OutputItemType="analyzer" />
+  <PackageReference Include="Chickensoft.SuperNodes" Version="{VERSION}" PrivateAssets="all" OutputItemType="analyzer" />
+
+  <!-- Type definitions and attributes used by SuperNodes. -->
+  <!-- By convention, version will be the same as the generator itself. -->
+  <PackageReference Include="Chickensoft.SuperNodes.Types" Version="{VERSION}" />
 </ItemGroup>
 ```
+
+> 💡 SuperNodes used to inject the attributes and types needed to make it work in your project automatically, but this prevents other assemblies from being able to take advantage of SuperNodes' reflection-free introspection features. For maximum compatibility, the `Chickensoft.SuperNodes.Types` has to be included as a project dependency so that runtime types are shared.
+>
+> Cross-assembly introspection can be a valuable feature for mods, standalone map editors, dynamic assembly injection, etc. We hope you agree that this additional dependency is worth it for those capabilities.
 
 ## 🔮 Superpowers for C# Scripts
 
@@ -733,6 +742,7 @@ Special thanks to those in the Godot and Chickensoft Discord Servers for supplyi
 [branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/branch_coverage.svg
 
 <!-- Content -->
+[nuget]: https://www.nuget.org/packages/Chickensoft.SuperNodes/
 [godot-generator-problems]: https://github.com/godotengine/godot/issues/66597
 [generators]: https://github.com/amis92/csharp-source-generators
 [default-interfaces]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/default-interface-methods

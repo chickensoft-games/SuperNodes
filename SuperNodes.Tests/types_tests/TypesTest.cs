@@ -54,7 +54,9 @@ public class TypesTest {
       IsField: false,
       IsMutable: true,
       IsReadable: true,
-      Attributes: ImmutableDictionary<string, ScriptAttributeDescription>.Empty
+      Attributes: ImmutableDictionary<
+        string, ImmutableArray<ScriptAttributeDescription>
+      >.Empty
     );
 
     property.Name.ShouldBe("Property");

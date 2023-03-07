@@ -10,6 +10,7 @@
     <LangVersion>preview</LangVersion>
     <RootNamespace>SuperNodes</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NoWarn>NU5128</NoWarn>
 
     <Title>SuperNodes</Title>
     <Version>1.0.0</Version>
