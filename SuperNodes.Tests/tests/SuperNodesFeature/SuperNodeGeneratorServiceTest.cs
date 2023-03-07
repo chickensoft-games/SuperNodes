@@ -248,22 +248,23 @@ public class SuperNodeGeneratorServiceTest {
         false,
         true,
         true,
-        new Dictionary<string, ScriptAttributeDescription>() {
-          ["global::Godot.ExportAttribute"] =
+        new Dictionary<string, ImmutableArray<ScriptAttributeDescription>>() {
+          ["global::Godot.ExportAttribute"] = new ScriptAttributeDescription[] {
             new ScriptAttributeDescription(
               "Export",
               typeof(global::Godot.ExportAttribute),
-              ImmutableArray.Create<dynamic>(
-                PropertyHint.Range,
-                "0, 100, 1"
-              )
-            ),
-          ["global::System.SerializableAttribute"] =
+              new dynamic[] {
+                PropertyHint.Range, "0, 100, 1",
+              }.ToImmutableArray()
+            )
+          }.ToImmutableArray(),
+          ["global::System.SerializableAttribute"] = new ScriptAttributeDescription[] {
             new ScriptAttributeDescription(
               "Serializable",
               typeof(global::System.SerializableAttribute),
-              Array.Empty<dynamic>().ToImmutableArray()
+              ImmutableArray<dynamic>.Empty
             )
+          }.ToImmutableArray()
         }.ToImmutableDictionary()
       ),
       ["_someField"] = new ScriptPropertyOrField(
@@ -272,7 +273,7 @@ public class SuperNodeGeneratorServiceTest {
         true,
         true,
         true,
-        ImmutableDictionary<string, ScriptAttributeDescription>.Empty
+        ImmutableDictionary<string, ImmutableArray<ScriptAttributeDescription>>.Empty
       )
       }.ToImmutableDictionary();
     """.NormalizeLineEndings());
