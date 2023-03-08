@@ -1,6 +1,9 @@
 SuperNodes.Tests/coverage
 SuperNodes.Tests/badges
 
+SuperNodes.TestCases/coverage/*
+!SuperNodes.TestCases/coverage/.gdignore
+
 LocalPackages/
 .godot/
 bin/

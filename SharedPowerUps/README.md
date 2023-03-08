@@ -24,13 +24,13 @@ In the `nuget.config` file, add a key (any name will work) with the value contai
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-	<config>
-	</config>
-	<settings>
-	</settings>
-	<packageSources>
-		<add key="Local Packages" value="/Somewhere/LocalPackages" />
-	</packageSources>
+  <config>
+  </config>
+  <settings>
+  </settings>
+  <packageSources>
+    <add key="Local Packages" value="/Somewhere/LocalPackages" />
+  </packageSources>
 </configuration>
 ```
 

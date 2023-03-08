@@ -1,0 +1,3 @@
+[*.cs]
+# Don't try to turn comments into docs in a test project.
+dotnet_diagnostic.RCS1181.severity = none
