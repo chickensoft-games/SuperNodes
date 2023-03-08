@@ -28,6 +28,13 @@ public class SuperNodeGeneratorServiceTest {
             }.ToImmutableArray()
           ),
           new AttributeDescription(
+            Name: "Export",
+            Type: "global::Godot.ExportAttribute",
+            ArgumentExpressions: new string[] {
+              "PropertyHint.Range", "\"-500, 500, 1\""
+            }.ToImmutableArray()
+          ),
+          new AttributeDescription(
             Name: "Serializable",
             Type: "global::System.SerializableAttribute",
             ArgumentExpressions: ImmutableArray<string>.Empty
@@ -243,36 +250,43 @@ public class SuperNodeGeneratorServiceTest {
     public static ImmutableDictionary<string, ScriptPropertyOrField> ScriptPropertiesAndFields { get; }
       = new Dictionary<string, ScriptPropertyOrField>() {
       ["SomeProperty"] = new ScriptPropertyOrField(
-        "SomeProperty",
-        typeof(int),
-        false,
-        true,
-        true,
+        Name: "SomeProperty",
+        Type: typeof(int),
+        IsField: false,
+        IsMutable: true,
+        IsReadable: true,
         new Dictionary<string, ImmutableArray<ScriptAttributeDescription>>() {
           ["global::Godot.ExportAttribute"] = new ScriptAttributeDescription[] {
             new ScriptAttributeDescription(
-              "Export",
-              typeof(global::Godot.ExportAttribute),
-              new dynamic[] {
+              Name: "Export",
+              Type: typeof(global::Godot.ExportAttribute),
+              ArgumentExpressions: new dynamic[] {
                 PropertyHint.Range, "0, 100, 1",
+              }.ToImmutableArray()
+            ),
+            new ScriptAttributeDescription(
+              Name: "Export",
+              Type: typeof(global::Godot.ExportAttribute),
+              ArgumentExpressions: new dynamic[] {
+                PropertyHint.Range, "-500, 500, 1",
               }.ToImmutableArray()
             )
           }.ToImmutableArray(),
           ["global::System.SerializableAttribute"] = new ScriptAttributeDescription[] {
             new ScriptAttributeDescription(
-              "Serializable",
-              typeof(global::System.SerializableAttribute),
-              ImmutableArray<dynamic>.Empty
+              Name: "Serializable",
+              Type: typeof(global::System.SerializableAttribute),
+              ArgumentExpressions: ImmutableArray<dynamic>.Empty
             )
           }.ToImmutableArray()
         }.ToImmutableDictionary()
       ),
       ["_someField"] = new ScriptPropertyOrField(
-        "_someField",
-        typeof(string),
-        true,
-        true,
-        true,
+        Name: "_someField",
+        Type: typeof(string),
+        IsField: true,
+        IsMutable: true,
+        IsReadable: true,
         ImmutableDictionary<string, ImmutableArray<ScriptAttributeDescription>>.Empty
       )
       }.ToImmutableDictionary();

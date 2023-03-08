@@ -39,9 +39,7 @@ public class PowerUpRewriterTest {
       typeParameters: new Dictionary<string, string>() {
         ["TA"] = "string",
         ["TB"] = "int"
-      }.ToImmutableDictionary(),
-      powerUpClassName: powerUpName,
-      superNodeClassName: superNodeName
+      }.ToImmutableDictionary()
     );
 
     // PowerUpRewriter doesn't change class name, remove PowerUpAttribute, and
@@ -82,9 +80,9 @@ public class PowerUpRewriterTest {
         public static string Value = "Hi.";
         string ExecuteA(string item)
         {
-          {{superNodeName}}.Value = "Hello.";
+          {{powerUpName}}.Value = "Hello.";
           OtherGenericClass<string>.Value = "Goodbye.";
-          {{superNodeName}}.Value = "Whatever.";
+          {{powerUpName}}<string, int>.Value = "Whatever.";
           return item;
         }
 

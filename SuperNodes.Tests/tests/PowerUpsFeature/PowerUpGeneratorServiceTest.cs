@@ -9,9 +9,7 @@ public class PowerUpGeneratorServiceTest {
   public void CreatesPowerUpRewriter() {
     var service = new PowerUpGeneratorService();
     var rewriter = service.CreatePowerUpRewriter(
-      typeParameters: ImmutableDictionary<string, string>.Empty,
-      powerUpClassName: "PowerUp",
-      superNodeClassName: "SuperNode"
+      typeParameters: ImmutableDictionary<string, string>.Empty
     );
     rewriter.ShouldBeAssignableTo<PowerUpRewriter>();
   }

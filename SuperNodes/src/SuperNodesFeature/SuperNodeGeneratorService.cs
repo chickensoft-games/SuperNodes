@@ -220,12 +220,21 @@ public class SuperNodeGeneratorService
       var propOrField = propsAndFields[propI];
       var propComma
         = propOrField == propsAndFields[propsAndFields.Length - 1] ? "" : ",";
-      fields.Add($"{Tab(1)}[\"{propOrField.NameReference}\"] = new ScriptPropertyOrField(");
-      fields.Add($"{Tab(2)}\"{propOrField.NameReference}\",");
-      fields.Add($"{Tab(2)}typeof({propOrField.Type}),");
-      fields.Add($"{Tab(2)}{propOrField.IsField.ToString().ToLower()},");
-      fields.Add($"{Tab(2)}{propOrField.IsMutable.ToString().ToLower()},");
-      fields.Add($"{Tab(2)}{propOrField.IsReadable.ToString().ToLower()},");
+      fields.Add(
+        $"{Tab(1)}[\"{propOrField.NameReference}\"] " +
+        "= new ScriptPropertyOrField("
+      );
+      fields.Add($"{Tab(2)}Name: \"{propOrField.NameReference}\",");
+      fields.Add($"{Tab(2)}Type: typeof({propOrField.Type}),");
+      fields.Add(
+        $"{Tab(2)}IsField: {propOrField.IsField.ToString().ToLower()},"
+      );
+      fields.Add(
+        $"{Tab(2)}IsMutable: {propOrField.IsMutable.ToString().ToLower()},"
+      );
+      fields.Add(
+        $"{Tab(2)}IsReadable: {propOrField.IsReadable.ToString().ToLower()},"
+      );
 
       // Convert attributes into a
       // Dictionary<string, ImmutableArray<ScriptAttributeDescription>>
@@ -261,16 +270,18 @@ public class SuperNodeGeneratorService
             var attrDesc = attrDescriptions[descI];
             var descComma = descI == attrDescriptions.Length - 1 ? "" : ",";
             var argumentExpressions = attrDesc.ArgumentExpressions.IsEmpty
-              ? new string[] { $"{Tab(5)}ImmutableArray<dynamic>.Empty" }
+              ? new string[] {
+                  $"{Tab(5)}ArgumentExpressions: ImmutableArray<dynamic>.Empty"
+                }
               : new string[] {
-                $"{Tab(5)}new dynamic[] {{",
+                $"{Tab(5)}ArgumentExpressions: new dynamic[] {{",
                 $"{Tab(6)}{string.Join(", ", attrDesc.ArgumentExpressions)},",
                 $"{Tab(5)}}}.ToImmutableArray()"
               };
             fields.AddRange(new string[] {
               $"{Tab(4)}new ScriptAttributeDescription(",
-              $"{Tab(5)}\"{attrDesc.Name}\",",
-              $"{Tab(5)}typeof({attrDesc.Type}),",
+              $"{Tab(5)}Name: \"{attrDesc.Name}\",",
+              $"{Tab(5)}Type: typeof({attrDesc.Type}),",
             });
             fields.AddRange(argumentExpressions);
             fields.Add($"{Tab(4)}){descComma}");

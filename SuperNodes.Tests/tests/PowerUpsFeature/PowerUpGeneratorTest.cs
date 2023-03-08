@@ -102,9 +102,7 @@ public class PowerUpGeneratorTest {
     var rewriter = new Mock<PowerUpRewriter>();
 
     genService.Setup(gs => gs.CreatePowerUpRewriter(
-      It.IsAny<ImmutableDictionary<string, string>>(),
-      powerUp.Name,
-      superNode.Name
+      It.IsAny<ImmutableDictionary<string, string>>()
     )).Returns(rewriter.Object);
 
     var rewrittenTreeRoot = CSharpSyntaxTree.ParseText("""

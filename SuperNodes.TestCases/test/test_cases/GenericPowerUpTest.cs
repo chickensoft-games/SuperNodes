@@ -103,6 +103,6 @@ public class GenericPowerUpTest : TestClass {
     generic.A.ShouldBe("Hello");
     other.A.ShouldBe("World!");
     node._Notification((int)Node.NotificationReady);
-    node.Called.ShouldBe(new[] { nameof(GenericPowerUpNode) });
+    node.Called.ShouldBe(new[] { nameof(GenericPowerUp<string, MyModel>) });
   }
 }

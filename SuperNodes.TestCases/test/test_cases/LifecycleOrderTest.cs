@@ -33,7 +33,7 @@ public class LifecycleOrderTest : TestClass {
     node._Notification((int)Node.NotificationReady);
     node.Called.ShouldBe(new[] {
       nameof(LifecycleOrderNode.Generator1),
-      nameof(LifecycleOrderNode),
+      nameof(TestPowerUp),
       nameof(LifecycleOrderNode.Generator2)
     });
   }

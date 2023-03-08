@@ -465,3 +465,5 @@ dotnet_diagnostic.RCS1093.severity = none
 dotnet_diagnostic.RCS1160.severity = none
 # Allow extensions to have unused `this` parameters.
 dotnet_diagnostic.RCS1175.severity = none
+# Don't make me change if statements to conditional expressions.
+dotnet_diagnostic.IDE0046.severity = none
