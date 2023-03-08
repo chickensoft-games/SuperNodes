@@ -34,6 +34,6 @@ SuperNodes can do a LOT — [check out the official documentation][docs] for us
 [discord]: https://discord.gg/gSjaPgMmYW
 [discord-badge]: https://raw.githubusercontent.com/chickensoft-games/chickensoft_site/main/static/img/badges/discord_badge.svg
 [read-the-docs-badge]: https://raw.githubusercontent.com/chickensoft-games/chickensoft_site/main/static/img/badges/read_the_docs_badge.svg
-[docs]: https://chickensoft.games/docs/setup
+[docs]: https://chickensoft.games/docs/super_nodes
 [line-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/line_coverage.svg
 [branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/SuperNodes/main/SuperNodes.Tests/reports/branch_coverage.svg
