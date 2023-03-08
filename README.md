@@ -1,4 +1,4 @@
-# SuperNodes
+# 🔮 SuperNodes
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord][discord-badge]][discord] [![Read the docs][read-the-docs-badge]][docs] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
@@ -14,7 +14,7 @@ SuperNodes is a C# source generator that gives superpowers to Godot node scripts
 
 ---
 
-## [Documentation][docs]
+## 📖 [Documentation][docs]
 
 SuperNodes can do a LOT — [check out the official documentation][docs] for usage details.
 
