@@ -15,10 +15,9 @@
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Chickensoft.GoDotTest" Version="1.1.2-beta.4.0.0.17" />
-    <!-- Bring your own assertion library for tests! -->
-    <!-- We're using Shouldly for this example, but you can use anything. -->
+    <PackageReference Include="Chickensoft.GoDotTest" Version="1.1.7" />
     <PackageReference Include="Shouldly" Version="4.1.0" />
     <!-- LightMock is a mocking library that can run without reflection. -->
     <PackageReference Include="LightMock.Generator" Version="1.2.2" />

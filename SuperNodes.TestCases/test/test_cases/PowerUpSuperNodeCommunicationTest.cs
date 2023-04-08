@@ -25,7 +25,9 @@ public partial class MyPowerUp : Node {
 
 [PowerUp]
 public partial class MyGenericPowerUp<T> : Node {
+#pragma warning disable CA1000
   public static T Thing { get; set; } = default!;
+#pragma warning restore CA1000
 
   public void OnMyGenericPowerUp(int what) {
     if (what == NotificationReady) {

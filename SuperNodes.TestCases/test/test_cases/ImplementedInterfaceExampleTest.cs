@@ -1,8 +1,8 @@
 namespace ImplementedInterfaceExample;
 
 using System.Diagnostics;
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 using SuperNodes.Types;
 
 [SuperNode(typeof(MyPowerUp))]

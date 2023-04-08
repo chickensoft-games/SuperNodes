@@ -302,7 +302,9 @@ public class CodeService : ICodeService {
       if (
         member is IPropertySymbol property
       ) {
-        isMutable = !property.IsReadOnly;
+        // Consider init-only properties immutable to prevent build errors.
+        var isInitOnly = property.SetMethod?.IsInitOnly == true;
+        isMutable = !property.IsReadOnly && !property.IsAbstract && !isInitOnly;
         isReadable = !property.IsWriteOnly;
         var hasExplicitInterfaceImplementations = property
           .ExplicitInterfaceImplementations

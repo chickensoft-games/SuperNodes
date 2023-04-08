@@ -2,8 +2,8 @@ namespace AdvancedReflection;
 
 using System;
 using System.Collections.Immutable;
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 using SuperNodes.Types;
 
 [SuperNode(typeof(MyPowerUp))]
