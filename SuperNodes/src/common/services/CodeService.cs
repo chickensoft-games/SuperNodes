@@ -323,13 +323,14 @@ public class CodeService : ICodeService {
             interfaceName, interfaceMember.ToDisplayParts()
           );
         }
-        type = property.Type.ToString();
-        typeParts = property.Type.ToDisplayParts().Select(
-          part => new SimpleSymbolDisplayPart(part.Kind, part.ToString())
-        ).ToImmutableArray();
+        type = property.Type.ToString().TrimEnd('?');
+        typeParts = property.Type.ToDisplayParts()
+          .Select(
+            part => new SimpleSymbolDisplayPart(part.Kind, part.ToString())
+          ).ToImmutableArray();
       }
       else if (member is IFieldSymbol field) {
-        type = field.Type.ToString();
+        type = field.Type.ToString().TrimEnd('?');
         isMutable = !field.IsReadOnly;
       }
 
@@ -358,6 +359,9 @@ public class CodeService : ICodeService {
   public ImmutableArray<SimpleSymbolDisplayPart> ExtractRelevantIdentifierParts(
     string beginningIdentifier, ImmutableArray<SymbolDisplayPart> parts
   ) {
+    // Searches for the first part that matches the beginning identifier and
+    // captures the rest of the parts. This is used to chop off extraneous
+    // leading namespaces.
     var relevantNameParts = new List<SimpleSymbolDisplayPart>();
     var shouldCaptureParts = false;
     var genericStackDepth = 0;

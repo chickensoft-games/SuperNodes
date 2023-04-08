@@ -45,49 +45,6 @@ public class MySerializerHelper : ITypeReceiver<bool> {
     => Serializer.Serialize<TSerialize>(Value);
 }
 
-// [PowerUp]
-// public abstract partial class MyPowerUp : Node {
-//   private readonly ISerializer _serializer = new MySerializer();
-
-//   #region StaticReflectionStubs
-
-//   [PowerUpIgnore]
-//   public abstract ImmutableDictionary<string, ScriptPropertyOrField>
-//     PropertiesAndFields { get; }
-
-//   [PowerUpIgnore]
-//   public abstract dynamic GetScriptPropertyOrField(string name);
-
-//   [PowerUpIgnore]
-//   public abstract void SetScriptPropertyOrField(string name, dynamic value);
-
-//   [PowerUpIgnore]
-//   public abstract TResult GetScriptPropertyOrFieldType<TResult>(
-//     string scriptProperty, ITypeReceiver<TResult> receiver
-//   );
-
-//   #endregion StaticReflectionStubs
-
-//   public void OnMyPowerUp(int what) {
-//     if (what == NotificationReady) {
-//       foreach (var memberName in PropertiesAndFields.Keys) {
-//         var member = PropertiesAndFields[memberName];
-
-//         if (!member.IsReadable || member.IsField) { continue; }
-
-//         var value = GetScriptPropertyOrField(memberName);
-//         var serializerHelper = new MySerializerHelper(_serializer, value);
-//         var result = GetScriptPropertyOrFieldType(memberName, serializerHelper);
-//         if (!result) {
-//           throw new InvalidOperationException(
-//             $"Failed to serialize {memberName}."
-//           );
-//         }
-//       }
-//     }
-//   }
-// }
-
 public interface ISerializer {
   bool Serialize<T>(T value);
   T Deserialize<T>(dynamic value);
