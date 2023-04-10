@@ -2,8 +2,8 @@ namespace SuperNodes.TestCases;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 using Shouldly;
 using SuperNodes.Types;
 

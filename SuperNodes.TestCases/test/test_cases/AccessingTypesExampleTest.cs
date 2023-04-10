@@ -1,8 +1,8 @@
 namespace AccessingTypesExample;
 
 using System;
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 using SuperNodes.Types;
 
 [SuperNode]
