@@ -130,14 +130,17 @@ public static class Tester {
   /// <returns>Symbol associated with the syntax tree node.</returns>
   public static TSymbol GetSymbol<TNode, TSymbol>(SyntaxTree tree, TNode node)
     where TNode : SyntaxNode
-    where TSymbol : ISymbol => (TSymbol)CSharpCompilation
-      .Create("AssemblyName")
-      .AddReferences(
-        MetadataReference.CreateFromFile(
-          typeof(object).Assembly.Location
-        )
-      )
-      .AddSyntaxTrees(tree)
-      .GetSemanticModel(tree)
-      .GetDeclaredSymbol(node)!;
+    where TSymbol : ISymbol {
+    var references = AppDomain.CurrentDomain.GetAssemblies()
+      .Where(assembly => !assembly.IsDynamic)
+      .Select(assembly => MetadataReference.CreateFromFile(assembly.Location))
+      .Cast<MetadataReference>();
+
+    return (TSymbol)CSharpCompilation
+    .Create("AssemblyName")
+    .AddReferences(references)
+    .AddSyntaxTrees(tree)
+    .GetSemanticModel(tree)
+    .GetDeclaredSymbol(node)!;
+  }
 }

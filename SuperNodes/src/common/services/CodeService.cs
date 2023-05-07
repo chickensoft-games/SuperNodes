@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using SuperNodes.Common.Models;
+using SuperNodes.Common.Utils;
 
 /// <summary>
 /// Common code operations for syntax nodes and semantic model symbols.
@@ -293,6 +294,16 @@ public class CodeService : ICodeService {
         member.IsImplicitlyDeclared // no backing fields, etc
       ) { continue; }
 
+      var rawAttributes = member.GetAttributes();
+
+      // Ignore members that have a [PowerUpIgnore] attribute.
+      if (
+        HasAttributeFullyQualified(
+          rawAttributes,
+          Constants.POWER_UP_IGNORE_ATTRIBUTE_NAME_FULLY_QUALIFIED
+        )
+      ) { continue; }
+
       var name = member.Name;
       var isMutable = false;
       var isReadable = true;
@@ -336,7 +347,7 @@ public class CodeService : ICodeService {
         isMutable = !field.IsReadOnly;
       }
 
-      var attributes = GetAttributesForPropOrField(member.GetAttributes());
+      var attributes = GetAttributesForPropOrField(rawAttributes);
 
       var propOrField = new PropOrField(
         Name: name,
@@ -402,6 +413,15 @@ public class CodeService : ICodeService {
       attribute => attribute.AttributeClass?.Name == fullName
     );
   }
+
+  public bool HasAttributeFullyQualified(
+    ImmutableArray<AttributeData> attributes, string fullyQualifiedName
+  ) => attributes.Any(
+      attribute =>
+        attribute.AttributeClass?.ToDisplayString(
+          SymbolDisplayFormat.FullyQualifiedFormat
+        ) == fullyQualifiedName
+    );
 
   public ImmutableArray<AttributeDescription>
     GetAttributesForPropOrField(ImmutableArray<AttributeData> attributes

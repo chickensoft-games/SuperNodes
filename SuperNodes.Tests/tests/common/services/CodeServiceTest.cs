@@ -197,6 +197,7 @@ public class BasicSyntaxOperationsServiceTest {
     const string code = """
     namespace Foo {
       using System;
+      using SuperNodes.Types;
 
       public class Bar : IFoo, IBar {
         bool IFoo.FooProp => true;
@@ -207,6 +208,9 @@ public class BasicSyntaxOperationsServiceTest {
 
         [Obsolete("Old property.")]
         public string Property { get; set; } = "";
+
+        [PowerUpIgnore]
+        public int Property2 { get; set; } = 0;
 
         [Obsolete]
         private int _field = 0;
@@ -507,6 +511,22 @@ public class BasicSyntaxOperationsServiceTest {
     var codeService = new CodeService();
 
     codeService.GetAttribute(symbol.Object, "TestAttribute").ShouldBeNull();
+  }
+
+  [Fact]
+  public void HasAttributeFullyQualifiedHandlesNullAttributeClass() {
+    var symbol = new Mock<INamedTypeSymbol>();
+    var attributeData = new TestAttributeData();
+    symbol.Setup(s => s.GetAttributes())
+      .Returns(new[] { attributeData }.ToImmutableArray<AttributeData>());
+
+    var codeService = new CodeService();
+
+    var attributes = new[] { attributeData }.ToImmutableArray<AttributeData>();
+
+    codeService
+      .HasAttributeFullyQualified(attributes, "TestAttribute")
+      .ShouldBeFalse();
   }
 
   [Fact]
