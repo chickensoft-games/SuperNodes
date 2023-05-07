@@ -186,6 +186,8 @@ public class Constants {
     = "PowerUpIgnore";
   public const string POWER_UP_IGNORE_ATTRIBUTE_NAME_FULL
     = "PowerUpIgnoreAttribute";
+  public const string POWER_UP_IGNORE_ATTRIBUTE_NAME_FULLY_QUALIFIED
+    = "global::SuperNodes.Types.PowerUpIgnoreAttribute";
 
   public const string SUPER_NODE_MISSING_NOTIFICATION_METHOD
     = "SUPER_NODE_MISSING_NOTIFICATION_METHOD";
