@@ -275,17 +275,7 @@ public class BasicSyntaxOperationsServiceTest {
           IsField: false,
           IsMutable: false,
           IsReadable: true,
-          NameParts: new SimpleSymbolDisplayPart[] {
-            new SimpleSymbolDisplayPart(
-              SymbolDisplayPartKind.InterfaceName, "IBar"
-            ),
-            new SimpleSymbolDisplayPart(
-              SymbolDisplayPartKind.Punctuation, "."
-            ),
-            new SimpleSymbolDisplayPart(
-              SymbolDisplayPartKind.PropertyName, "BarProp"
-            )
-          }.ToImmutableArray(),
+          NameParts: ImmutableArray<SimpleSymbolDisplayPart>.Empty,
           TypeParts: ImmutableArray.Create(
             new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Keyword, "bool")
           )
