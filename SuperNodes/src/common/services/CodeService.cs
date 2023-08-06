@@ -323,7 +323,10 @@ public class CodeService : ICodeService {
         var correspondingInterfaceMembers = member
           .ExplicitOrImplicitInterfaceImplementations();
         var declaredInInterface = correspondingInterfaceMembers.Any();
-        if (declaredInInterface) {
+        if (
+          declaredInInterface &&
+          property.ExplicitInterfaceImplementations.Any()
+        ) {
           // All members originally declared in interfaces are referred to by
           // IInterface.Name to help avoid naming collisions
 
