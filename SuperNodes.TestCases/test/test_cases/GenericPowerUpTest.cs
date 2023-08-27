@@ -52,17 +52,7 @@ public abstract partial class GenericPowerUp<TA, TB>
     // to use an ITypeReceiver object (supplied by SuperNodes).
     var typeReceiver = new TypeReceiver<TA>(A);
 
-    // Deduce the string name of a property with generics since SuperNodes
-    // replaces the generic
-    // parameters of a PowerUp with the generic arguments given to it from a
-    // SuperNode at build-time. Additionally, typeof also works at
-    // compile-time, allowing us to avoid having to use reflection at runtime.
-    //
-    // Whew!
-    // var genericPropertyName = nameof(IGenericPowerUp<TA, TB>) +
-    //   "<" + this.TypeParam(typeof(TA)) + ", " + this.TypeParam(typeof(TB)) +
-    //   ">." + nameof(IGenericPowerUp<TA, TB>.A);
-
+    // Deduce the string name of a property with generics.
     var genericPropertyName = nameof(IOtherInterface<TA>.A);
     var isAanA
       = GetScriptPropertyOrFieldType(genericPropertyName, typeReceiver);
