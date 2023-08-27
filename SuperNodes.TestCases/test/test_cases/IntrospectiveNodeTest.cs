@@ -33,19 +33,19 @@ public abstract partial class IntrospectivePowerUp : Node {
   );
 
   [PowerUpIgnore]
-  public abstract dynamic GetScriptPropertyOrField(string scriptProperty);
+  public abstract dynamic? GetScriptPropertyOrField(string scriptProperty);
 
   [PowerUpIgnore]
   public abstract void SetScriptPropertyOrField(
-    string scriptProperty, dynamic value
+    string scriptProperty, dynamic? value
   );
 
   // A type receiver which checks the type of a value when the reified type
   // is given to its Receive method.
   private class CheckValueType : ITypeReceiver<bool> {
-    public dynamic Value { get; }
+    public dynamic? Value { get; }
 
-    public CheckValueType(dynamic value) {
+    public CheckValueType(dynamic? value) {
       Value = value;
     }
 

@@ -38,7 +38,7 @@ public class TypesTest {
     var attribute = new ScriptAttributeDescription(
       Name: "Test",
       Type: typeof(TestAttribute),
-      new dynamic[] { "argument" }.ToImmutableArray()
+      new dynamic?[] { "argument" }.ToImmutableArray()
     );
 
     attribute.Name.ShouldBe("Test");

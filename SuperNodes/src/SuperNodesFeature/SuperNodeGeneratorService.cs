@@ -271,10 +271,11 @@ public class SuperNodeGeneratorService
             var descComma = descI == attrDescriptions.Length - 1 ? "" : ",";
             var argumentExpressions = attrDesc.ArgumentExpressions.IsEmpty
               ? new string[] {
-                  $"{Tab(5)}ArgumentExpressions: ImmutableArray<dynamic>.Empty"
+                  $"{Tab(5)}ArgumentExpressions: " +
+                    "ImmutableArray<dynamic?>.Empty"
                 }
               : new string[] {
-                $"{Tab(5)}ArgumentExpressions: new dynamic[] {{",
+                $"{Tab(5)}ArgumentExpressions: new dynamic?[] {{",
                 $"{Tab(6)}{string.Join(", ", attrDesc.ArgumentExpressions)},",
                 $"{Tab(5)}}}.ToImmutableArray()"
               };
@@ -348,7 +349,7 @@ public class SuperNodeGeneratorService
     ImmutableArray<PropOrField> propsAndFields
   ) {
     var getPropertyOrFieldFn = new List<string> {
-      "public dynamic GetScriptPropertyOrField(string scriptProperty) {",
+      "public dynamic? GetScriptPropertyOrField(string scriptProperty) {",
       $"{Tab(1)}switch (scriptProperty) {{",
     };
 
@@ -383,7 +384,7 @@ public class SuperNodeGeneratorService
   ) {
     var setPropertyOrFieldFn = new List<string> {
       "public void SetScriptPropertyOrField(" +
-      "string scriptProperty, dynamic value) {",
+      "string scriptProperty, dynamic? value) {",
       $"{Tab(1)}switch (scriptProperty) {{",
     };
 

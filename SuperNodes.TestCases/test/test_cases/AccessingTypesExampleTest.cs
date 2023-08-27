@@ -34,9 +34,9 @@ public partial class MySuperNode : Node {
 
 public class MySerializerHelper : ITypeReceiver<bool> {
   public ISerializer Serializer { get; }
-  public dynamic Value { get; }
+  public dynamic? Value { get; }
 
-  public MySerializerHelper(ISerializer serializer, dynamic value) {
+  public MySerializerHelper(ISerializer serializer, dynamic? value) {
     Serializer = serializer;
     Value = value;
   }
@@ -47,12 +47,12 @@ public class MySerializerHelper : ITypeReceiver<bool> {
 
 public interface ISerializer {
   bool Serialize<T>(T value);
-  T Deserialize<T>(dynamic value);
+  T Deserialize<T>(dynamic? value);
 }
 
 public class MySerializer : ISerializer {
   public bool Serialize<T>(T value) => true; // Dummy implementation.
-  public T Deserialize<T>(dynamic value) => default!; // Dummy implementation.
+  public T Deserialize<T>(dynamic? value) => default!; // Dummy implementation.
 }
 
 public class AdvancedGenericPowerUpExampleTest : TestClass {
