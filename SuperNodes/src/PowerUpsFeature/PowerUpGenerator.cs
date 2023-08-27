@@ -160,6 +160,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
       .NormalizeLineEndings("\n").Split('\n').ToImmutableArray();
 
     return Format($$"""
+    #pragma warning disable
     #nullable enable
     {{usings}}
 
@@ -170,6 +171,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
       {{source}}
     {{If(node.Namespace is not null, "}")}}
     #nullable disable
+    #pragma warning restore
     """);
   }
 }

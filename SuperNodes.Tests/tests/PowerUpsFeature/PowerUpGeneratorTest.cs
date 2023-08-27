@@ -128,6 +128,7 @@ public class PowerUpGeneratorTest {
     var source = generator.GeneratePowerUp(powerUp, superNode);
 
     source.ShouldBe("""
+    #pragma warning disable
     #nullable enable
     using System.Collections;
     using Godot;
@@ -150,6 +151,7 @@ public class PowerUpGeneratorTest {
       }
     }
     #nullable disable
+    #pragma warning restore
     """.NormalizeLineEndings());
   }
 }

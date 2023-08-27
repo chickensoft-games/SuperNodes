@@ -64,6 +64,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       .GenerateNotificationHandlers(node.NotificationHandlers);
 
     return Format($$"""
+    #pragma warning disable
     #nullable enable
     using Godot;
     using SuperNodes.Types;
@@ -96,6 +97,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       "}"
     )}}
     #nullable disable
+    #pragma warning restore
     """).Clean();
   }
 
@@ -153,6 +155,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       .GenerateSetPropertyOrField(node.Name, propsAndFields);
 
     return Format($$"""
+    #pragma warning disable
     #nullable enable
     {{usings}}
 
@@ -174,6 +177,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       "}"
     )}}
     #nullable disable
+    #pragma warning restore
     """);
   }
 }
