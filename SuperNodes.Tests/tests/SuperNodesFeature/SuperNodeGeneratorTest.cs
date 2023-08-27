@@ -70,6 +70,7 @@ public class SuperNodeGeneratorTest {
     var source = generator.GenerateSuperNode(item);
 
     source.ShouldBe("""
+    #pragma warning disable
     #nullable enable
     using Godot;
     using SuperNodes.Types;
@@ -97,6 +98,7 @@ public class SuperNodeGeneratorTest {
       }
     }
     #nullable disable
+    #pragma warning restore
     """.NormalizeLineEndings());
   }
 
@@ -249,6 +251,7 @@ public class SuperNodeGeneratorTest {
     var source = generator.GenerateSuperNodeStatic(item, appliedPowerUps);
 
     source.ShouldBe("""
+    #pragma warning disable
     #nullable enable
     using System;
     using System.Collections;
@@ -269,6 +272,7 @@ public class SuperNodeGeneratorTest {
       }
     }
     #nullable disable
+    #pragma warning restore
     """.NormalizeLineEndings());
   }
 }
