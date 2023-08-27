@@ -35,10 +35,10 @@ public abstract partial class MyPowerUp : Node2D {
   public abstract ImmutableDictionary<string, ScriptPropertyOrField> PropertiesAndFields { get; }
 
   [PowerUpIgnore]
-  public abstract dynamic GetScriptPropertyOrField(string name);
+  public abstract dynamic? GetScriptPropertyOrField(string name);
 
   [PowerUpIgnore]
-  public abstract void SetScriptPropertyOrField(string name, dynamic value);
+  public abstract void SetScriptPropertyOrField(string name, dynamic? value);
 
   #endregion StaticReflectionStubs
 

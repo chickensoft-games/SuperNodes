@@ -5,6 +5,7 @@
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <NoWarn>IDE0290</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

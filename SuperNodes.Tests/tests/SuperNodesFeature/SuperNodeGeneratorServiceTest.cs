@@ -260,14 +260,14 @@ public class SuperNodeGeneratorServiceTest {
             new ScriptAttributeDescription(
               Name: "Export",
               Type: typeof(global::Godot.ExportAttribute),
-              ArgumentExpressions: new dynamic[] {
+              ArgumentExpressions: new dynamic?[] {
                 PropertyHint.Range, "0, 100, 1",
               }.ToImmutableArray()
             ),
             new ScriptAttributeDescription(
               Name: "Export",
               Type: typeof(global::Godot.ExportAttribute),
-              ArgumentExpressions: new dynamic[] {
+              ArgumentExpressions: new dynamic?[] {
                 PropertyHint.Range, "-500, 500, 1",
               }.ToImmutableArray()
             )
@@ -276,7 +276,7 @@ public class SuperNodeGeneratorServiceTest {
             new ScriptAttributeDescription(
               Name: "Serializable",
               Type: typeof(global::System.SerializableAttribute),
-              ArgumentExpressions: ImmutableArray<dynamic>.Empty
+              ArgumentExpressions: ImmutableArray<dynamic?>.Empty
             )
           }.ToImmutableArray()
         }.ToImmutableDictionary()
@@ -333,7 +333,7 @@ public class SuperNodeGeneratorServiceTest {
       .GenerateGetPropertyOrField(superNodeName, _propsAndFields);
 
     string.Join(Environment.NewLine, getPropertyOrField).ShouldBe("""
-    public dynamic GetScriptPropertyOrField(string scriptProperty) {
+    public dynamic? GetScriptPropertyOrField(string scriptProperty) {
       switch (scriptProperty) {
         case "SomeProperty":
           return SomeProperty;
@@ -358,7 +358,7 @@ public class SuperNodeGeneratorServiceTest {
       .GenerateSetPropertyOrField(superNodeName, _propsAndFields);
 
     string.Join(Environment.NewLine, setPropertyOrField).ShouldBe("""
-    public void SetScriptPropertyOrField(string scriptProperty, dynamic value) {
+    public void SetScriptPropertyOrField(string scriptProperty, dynamic? value) {
       switch (scriptProperty) {
         case "SomeProperty":
           SomeProperty = value;
