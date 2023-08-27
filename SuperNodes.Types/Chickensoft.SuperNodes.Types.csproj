@@ -11,7 +11,7 @@
     <DebugType>portable</DebugType>
 
     <Title>SuperNodes Types</Title>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Description>Runtime types for SuperNodes.</Description>
     <Copyright>© 2023 Chickensoft</Copyright>
     <Authors>Chickensoft</Authors>
