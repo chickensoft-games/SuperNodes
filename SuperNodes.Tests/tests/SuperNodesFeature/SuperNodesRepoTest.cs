@@ -84,7 +84,7 @@ public class SuperNodesRepoTest {
       code, out var symbol
     );
 
-    codeService.Setup(cs => cs.GetName(symbol, node))
+    codeService.Setup(cs => cs.GetNameWithGenerics(symbol, node))
       .Returns(symbol.Name);
     codeService.Setup(cs => cs.GetContainingNamespace(symbol))
       .Returns("Tests");

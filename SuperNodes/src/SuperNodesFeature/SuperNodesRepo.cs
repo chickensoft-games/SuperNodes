@@ -67,7 +67,8 @@ public class SuperNodesRepo : ISuperNodesRepo {
     ClassDeclarationSyntax classDeclaration,
     INamedTypeSymbol? symbol
   ) {
-    var name = CodeService.GetName(symbol, classDeclaration);
+    var name = CodeService.GetNameWithGenerics(symbol, classDeclaration);
+    var nameWithoutGenerics = CodeService.GetName(symbol, classDeclaration);
     var @namespace = CodeService.GetContainingNamespace(symbol);
     var baseClasses = CodeService.GetBaseClassHierarchy(symbol);
 
@@ -110,6 +111,7 @@ public class SuperNodesRepo : ISuperNodesRepo {
     return new SuperNode(
       Namespace: @namespace,
       Name: name,
+      NameWithoutGenerics: nameWithoutGenerics,
       Location: classDeclaration.GetLocation(),
       BaseClasses: baseClasses,
       LifecycleHooks: lifecycleHooksResponse.LifecycleHooks,

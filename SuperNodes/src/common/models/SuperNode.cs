@@ -14,9 +14,12 @@ using Microsoft.CodeAnalysis;
 /// </summary>
 /// <param name="Namespace">Fully qualified namespace containing the node
 /// (without the <c>global::</c> prefix).</param>
-/// <param name="Name">Name of the Godot Node (not fully qualified). Combine
+/// <param name="Name">Name of the Godot Node (not fully qualified, but includes
+/// generic parameter syntax). Combine
 /// with <paramref name="Namespace" /> to determine the fully resolved name.
 /// </param>
+/// <param name="NameWithoutGenerics">Name of the Godot node, without any
+/// generic parameter syntax.</param>
 /// <param name="Location">The location of the class declaration syntax node
 /// that corresponds to the SuperNode.</param>
 /// <param name="BaseClasses">Array of fully qualified base types (base class
@@ -50,6 +53,7 @@ using Microsoft.CodeAnalysis;
 public record SuperNode(
   string? Namespace,
   string Name,
+  string NameWithoutGenerics,
   Location Location,
   ImmutableArray<string> BaseClasses,
   ImmutableArray<IGodotNodeLifecycleHook> LifecycleHooks,
@@ -64,6 +68,7 @@ public record SuperNode(
   /// Filename prefix to use when generating the SuperNode's related
   /// implementation files.
   /// </summary>
-  public string FilenamePrefix
-    => Namespace is not "" ? $"{Namespace}.{Name}" : Name;
+  public string FilenamePrefix => Namespace is not ""
+    ? $"{Namespace}.{NameWithoutGenerics}"
+    : NameWithoutGenerics;
 }
