@@ -32,6 +32,7 @@ public class SuperNodeGeneratorTest {
       SuperNode: new SuperNode(
         Namespace: "global::Tests",
         Name: "TestSuperNode",
+        NameWithoutGenerics: "TestSuperNode",
         Location: new Mock<Location>().Object,
         BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
         LifecycleHooks: lifecycleHooks,
@@ -184,6 +185,7 @@ public class SuperNodeGeneratorTest {
     var superNode = new SuperNode(
       Namespace: "global::Tests",
       Name: "TestSuperNode",
+      NameWithoutGenerics: "TestSuperNode",
       Location: new Mock<Location>().Object,
       BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
       LifecycleHooks: ImmutableArray<IGodotNodeLifecycleHook>.Empty,

@@ -13,6 +13,7 @@ public class GenerationItemTest {
     var superNode = new SuperNode(
       Namespace: "global::Tests",
       Name: "SuperNode",
+      NameWithoutGenerics: "SuperNode",
       Location: new Mock<Location>().Object,
       BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
       LifecycleHooks: ImmutableArray<IGodotNodeLifecycleHook>.Empty,

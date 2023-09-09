@@ -552,6 +552,37 @@ public class BasicSyntaxOperationsServiceTest {
   }
 
   [Fact]
+  public void GetNameWithFallbackAndGenerics() {
+    var code = """
+      namespace Tests {
+        public class TestClass<TA, TB> { }
+      }
+    """;
+
+    var node = Tester.Parse<ClassDeclarationSyntax>(code);
+
+    var symbol = new Mock<INamedTypeSymbol>();
+
+    var ta = new Mock<ITypeParameterSymbol>();
+    ta.Setup(s => s.Name).Returns("TA");
+
+    var tb = new Mock<ITypeParameterSymbol>();
+    tb.Setup(s => s.Name).Returns("TB");
+
+    symbol.Setup(s => s.Name).Returns("TestClass");
+    symbol.Setup(s => s.TypeParameters).Returns(
+      new[] { ta.Object, tb.Object }.ToImmutableArray()
+    );
+
+    var codeService = new CodeService();
+
+    codeService.GetNameWithGenerics(symbol.Object, node)
+      .ShouldBe("TestClass<TA, TB>");
+    codeService.GetNameWithGenerics(null, node)
+      .ShouldBe(node.Identifier.ValueText);
+  }
+
+  [Fact]
   public void HasOnNotificationMethodHandlerFindsHandler() {
     var code = """
       namespace SuperNodes.Tests.SuperNodesFeature {

@@ -126,6 +126,19 @@ public interface ICodeService {
   );
 
   /// <summary>
+  /// Returns the name of the symbol, or the name of the identifier for the
+  /// given type declaration syntax node if the symbol is null.
+  /// <br />
+  /// If the type has generics, this appends the generic parameter syntax
+  /// to the name.
+  /// </summary>
+  /// <param name="symbol">Named type symbol.</param>
+  /// <param name="fallbackType">Fallback type declaration syntax node.</param>
+  string GetNameWithGenerics(
+    INamedTypeSymbol? symbol, TypeDeclarationSyntax fallbackType
+  );
+
+  /// <summary>
   /// Gets the name of the symbol, or null if the symbol is null.
   /// </summary>
   /// <param name="symbol">Named type symbol.</param>
@@ -457,6 +470,23 @@ public class CodeService : ICodeService {
   public string GetName(
     INamedTypeSymbol? symbol, TypeDeclarationSyntax fallbackType
   ) => symbol?.Name ?? fallbackType.Identifier.ValueText;
+
+  public string GetNameWithGenerics(
+    INamedTypeSymbol? symbol, TypeDeclarationSyntax fallbackType
+  ) {
+    var name = GetName(symbol, fallbackType);
+
+    if (symbol?.TypeParameters.Length > 0) {
+      name += "<" + string.Join(
+        ", ",
+        symbol.TypeParameters.Select(
+          typeParameter => typeParameter.Name
+        )
+      ) + ">";
+    }
+
+    return name;
+  }
 
   public string? GetName(ISymbol? symbol) => symbol?.Name;
 

@@ -85,6 +85,7 @@ public class PowerUpGeneratorTest {
     var superNode = new SuperNode(
       Namespace: "Tests",
       Name: "TestSuperNode",
+      NameWithoutGenerics: "TestSuperNode",
       Location: new Mock<Location>().Object,
       BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
       LifecycleHooks: ImmutableArray<IGodotNodeLifecycleHook>.Empty,
