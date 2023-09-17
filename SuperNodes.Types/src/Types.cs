@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using Godot;
 
 /// <summary>
-/// SuperNode attribute. Add this to a Godot node script class to use
+/// SuperNode attribute. Add this to a Godot object class to use
 /// functionality from other compatible source generators.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
@@ -18,7 +18,7 @@ public sealed class SuperNodeAttribute : Attribute {
   public object[] Args { get; }
 
   /// <summary>
-  /// SuperNode attribute. Add this to a Godot node script class to use
+  /// SuperNode attribute. Add this to a Godot object class to use
   /// functionality from other compatible source generators.
   /// </summary>
   public SuperNodeAttribute() {
@@ -26,7 +26,7 @@ public sealed class SuperNodeAttribute : Attribute {
   }
 
   /// <summary>
-  /// SuperNode attribute. Add this to a Godot node script class to use
+  /// SuperNode attribute. Add this to a Godot object class to use
   /// functionality from other compatible source generators.
   /// <br />
   /// Compatible source generator lifecycle methods or PowerUps that will
@@ -183,7 +183,7 @@ public static class NodeExtensions {
   /// name (e.g. System.Int32 instead of int). For best results, use the
   /// simpler type names wherever possible.
   /// </summary>
-  /// <param name="node">Godot node.</param>
+  /// <param name="node">Godot object.</param>
   /// <param name = "type">Type whose name should be computed.</param>
   /// <exception cref = "InvalidOperationException">Thrown if an unrecognized
   /// primitive type is encountered.</exception>

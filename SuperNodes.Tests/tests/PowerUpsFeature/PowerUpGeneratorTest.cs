@@ -25,7 +25,7 @@ public class PowerUpGeneratorTest {
     var code = """
     [PowerUp]
     public partial class TestPowerUp<TA, TB>
-      : Godot.Node, ITestPowerUp<TA, TB> {
+      : Godot.Object, ITestPowerUp<TA, TB> {
       public static ScriptPropertyOrField[] ScriptPropertiesAndFields { get; }
         = default!;
       public TResult GetScriptPropertyOrFieldType<TResult>(
@@ -62,7 +62,7 @@ public class PowerUpGeneratorTest {
       Name: "TestPowerUp",
       FullName: "global::Tests.TestPowerUp",
       Location: new Mock<Location>().Object,
-      BaseClass: "global::Godot.Node",
+      BaseClass: "global::Godot.Object",
       TypeParameters: new string[] { "TA", "TB" }.ToImmutableArray(),
       Interfaces: new string[] {
         "global::Tests.ITestPowerUp<TA, TB>"
@@ -87,7 +87,7 @@ public class PowerUpGeneratorTest {
       Name: "TestSuperNode",
       NameWithoutGenerics: "TestSuperNode",
       Location: new Mock<Location>().Object,
-      BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
+      BaseClasses: new string[] { "global::Godot.Object" }.ToImmutableArray(),
       LifecycleHooks: ImmutableArray<IGodotNodeLifecycleHook>.Empty,
       PowerUpHooksByFullName: powerUpHooksByFullName,
       NotificationHandlers: ImmutableArray<string>.Empty,
