@@ -15,7 +15,7 @@ public class GenerationItemTest {
       Name: "SuperNode",
       NameWithoutGenerics: "SuperNode",
       Location: new Mock<Location>().Object,
-      BaseClasses: new string[] { "global::Godot.Node" }.ToImmutableArray(),
+      BaseClasses: new string[] { "global::Godot.Object" }.ToImmutableArray(),
       LifecycleHooks: ImmutableArray<IGodotNodeLifecycleHook>.Empty,
       PowerUpHooksByFullName: ImmutableDictionary<string, PowerUpHook>.Empty,
       NotificationHandlers: ImmutableArray<string>.Empty,

@@ -8,7 +8,7 @@ public class Constants {
   /// <summary>Spaces per tab. Adjust to your generator's liking.</summary>
   public static int SPACES_PER_INDENT = 2;
 
-  public const string DEFAULT_BASE_CLASS = "global::Godot.Node";
+  public const string DEFAULT_BASE_CLASS = "global::Godot.Object";
 
   public static string BaseClass { get; set; } = DEFAULT_BASE_CLASS;
 
@@ -44,7 +44,7 @@ public class Constants {
       ["OnPredelete"] = new LifecycleMethod(
         "NotificationPredelete", VOID, NoArgs
       ),
-      // Godot.Node Notifications
+      // Godot.Object Notifications
       ["OnEnterTree"] = new LifecycleMethod(
         "NotificationEnterTree", VOID, NoArgs
       ),
