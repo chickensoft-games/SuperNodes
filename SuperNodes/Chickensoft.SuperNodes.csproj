@@ -13,7 +13,7 @@
     <NoWarn>NU5128</NoWarn>
 
     <Title>SuperNodes</Title>
-    <Version>1.6.0</Version>
+    <Version>1.6.1</Version>
     <Description>Supercharge your Godot nodes with lifecycle-aware mixins, third party source generators, script introspection, and dynamic property manipulation — all without runtime reflection!</Description>
     <Copyright>© 2023 Chickensoft Games</Copyright>
     <Authors>Chickensoft</Authors>

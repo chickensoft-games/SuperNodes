@@ -363,6 +363,12 @@ public class CodeService : ICodeService {
         isMutable = !field.IsReadOnly;
       }
 
+      // Remove any trailing ? part from typeParts — we don't need to worry
+      // about overall nullability.
+      if (typeParts.Length > 0 && typeParts.Last().Value == "?") {
+        typeParts = typeParts.RemoveAt(typeParts.Length - 1);
+      }
+
       var attributes = GetAttributesForPropOrField(rawAttributes);
 
       var propOrField = new PropOrField(
