@@ -217,6 +217,8 @@ public class BasicSyntaxOperationsServiceTest {
 
         protected readonly int _field2 = 1;
 
+        public string? NullableProperty { get; set;  }
+
         public void Method() {}
       }
 
@@ -304,6 +306,19 @@ public class BasicSyntaxOperationsServiceTest {
           )
         ),
         new PropOrField(
+          Name: "NullableProperty",
+          Reference: "NullableProperty",
+          Type: "string",
+          Attributes: ImmutableArray<AttributeDescription>.Empty,
+          IsField: false,
+          IsMutable: true,
+          IsReadable: true,
+          NameParts: ImmutableArray<SimpleSymbolDisplayPart>.Empty,
+          TypeParts: ImmutableArray.Create(
+            new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Keyword, "string")
+          )
+        ),
+        new PropOrField(
           Name: "Property",
           Reference: "Property",
           Type: "string",
@@ -323,7 +338,7 @@ public class BasicSyntaxOperationsServiceTest {
           TypeParts: ImmutableArray.Create(
             new SimpleSymbolDisplayPart(SymbolDisplayPartKind.Keyword, "string")
           )
-        ),
+        )
        }.ToImmutableArray();
 
     result.ShouldDeepEqual(expected);
