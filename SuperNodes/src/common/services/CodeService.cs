@@ -18,24 +18,24 @@ public interface ICodeService {
   /// Determines the list of visible type parameters shown on a class
   /// declaration syntax node.
   /// </summary>
-  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <param name="typeDeclaration">Class declaration syntax node.</param>
   /// <returns>Visible list of type parameters shown on that particular class
   /// declaration syntax node.</returns>
   ImmutableArray<string> GetTypeParameters(
-    ClassDeclarationSyntax classDeclaration
+    TypeDeclarationSyntax typeDeclaration
   );
 
   /// <summary>
   /// Determines the list of visible interfaces shown on a class declaration
   /// syntax node and returns the set of the fully qualified interface names.
   /// </summary>
-  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <param name="typeDeclaration">Class declaration syntax node.</param>
   /// <param name="symbol">Named type symbol corresponding to the class
   /// </param>
   /// <returns>Visible list of interfaces shown on that particular class
   /// declaration syntax node.</returns>
   ImmutableArray<string> GetVisibleInterfacesFullyQualified(
-    ClassDeclarationSyntax classDeclaration,
+    TypeDeclarationSyntax typeDeclaration,
     INamedTypeSymbol? symbol
   );
 
@@ -43,11 +43,11 @@ public interface ICodeService {
   /// Determines the list of visible generic interfaces shown on a class
   /// declaration syntax node.
   /// </summary>
-  /// <param name="classDeclaration">Class declaration syntax node.</param>
+  /// <param name="typeDeclaration">Class declaration syntax node.</param>
   /// <returns>Visible list of generic interfaces shown on that particular class
   /// declaration syntax node.</returns>
   ImmutableArray<string> GetVisibleGenericInterfaces(
-    ClassDeclarationSyntax classDeclaration
+    TypeDeclarationSyntax typeDeclaration
   );
 
   /// <summary>
@@ -161,9 +161,11 @@ public interface ICodeService {
   /// </summary>
   /// <param name="attribute">SuperNode attribute data found on a class symbol.
   /// </param>
+  /// <param name="includeLifecycleMethodStrings">True by default: set to false
+  /// to ignore method name strings as mixins.</param>
   /// <returns>Lifecycle hook information.</returns>
   LifecycleHooksResponse GetLifecycleHooks(
-    AttributeData? attribute
+    AttributeData? attribute, bool includeLifecycleMethodStrings = true
   );
 
   /// <summary>
@@ -189,6 +191,19 @@ public interface ICodeService {
   bool HasOnNotificationMethodHandler(
     SyntaxList<MemberDeclarationSyntax> members
   );
+
+  /// <summary>
+  /// Inspects a potentially nested type and returns its containing types in
+  /// order of outermost to innermost.
+  /// </summary>
+  /// <param name="symbol">Potential nested type.</param>
+  /// <param name="fallbackType">Fallback syntax node.</param>
+  /// <returns>Array of containing types, ordered by outermost to innermost.
+  /// </returns>
+  ImmutableArray<ContainingType> GetContainingTypes(
+    INamedTypeSymbol? symbol,
+    TypeDeclarationSyntax fallbackType
+  );
 }
 
 /// <summary>
@@ -196,11 +211,11 @@ public interface ICodeService {
 /// </summary>
 public class CodeService : ICodeService {
   public ImmutableArray<string> GetVisibleInterfacesFullyQualified(
-    ClassDeclarationSyntax classDeclaration,
+    TypeDeclarationSyntax typeDeclaration,
     INamedTypeSymbol? symbol
   ) {
-    var nonGenericInterfaces = GetVisibleInterfaces(classDeclaration);
-    var genericInterfaces = GetVisibleGenericInterfaces(classDeclaration);
+    var nonGenericInterfaces = GetVisibleInterfaces(typeDeclaration);
+    var genericInterfaces = GetVisibleGenericInterfaces(typeDeclaration);
     var visibleInterfaces = nonGenericInterfaces
       .Union(genericInterfaces)
       .ToImmutableArray();
@@ -232,17 +247,17 @@ public class CodeService : ICodeService {
   }
 
   public ImmutableArray<string> GetTypeParameters(
-    ClassDeclarationSyntax classDeclaration
+    TypeDeclarationSyntax typeDeclaration
   ) => (
-    classDeclaration.TypeParameterList?.Parameters
+    typeDeclaration.TypeParameterList?.Parameters
       .Select(parameter => parameter.Identifier.ValueText)
       .ToImmutableArray()
     ) ?? ImmutableArray<string>.Empty;
 
   public ImmutableArray<string> GetVisibleInterfaces(
-    ClassDeclarationSyntax classDeclaration
+    TypeDeclarationSyntax typeDeclaration
   ) => (
-    classDeclaration.BaseList?.Types
+    typeDeclaration.BaseList?.Types
       .Select(type => type.Type)
       .OfType<IdentifierNameSyntax>()
       .Select(type => type.Identifier.ValueText)
@@ -251,9 +266,9 @@ public class CodeService : ICodeService {
     ) ?? ImmutableArray<string>.Empty;
 
   public ImmutableArray<string> GetVisibleGenericInterfaces(
-    ClassDeclarationSyntax classDeclaration
+    TypeDeclarationSyntax typeDeclaration
   ) => (
-    classDeclaration.BaseList?.Types
+    typeDeclaration.BaseList?.Types
       .Select(type => type.Type)
       .OfType<GenericNameSyntax>()
       .Select(type => type.Identifier.ValueText)
@@ -524,7 +539,9 @@ public class CodeService : ICodeService {
       method.ParameterList.Parameters.First().Identifier.ValueText == "what"
   );
 
-  public LifecycleHooksResponse GetLifecycleHooks(AttributeData? attribute) {
+  public LifecycleHooksResponse GetLifecycleHooks(
+    AttributeData? attribute, bool includeLifecycleMethodStrings = true
+  ) {
     if (attribute is null) {
       return LifecycleHooksResponse.Empty;
     }
@@ -541,7 +558,7 @@ public class CodeService : ICodeService {
       foreach (var constant in arg.Values) {
         var constantType = constant.Type;
         var name = GetName(constantType);
-        if (name == "String") {
+        if (name == "String" && includeLifecycleMethodStrings) {
           // Found a lifecycle method. This can be the name of a method
           // to call from another generator or a method from a PowerUp.
           var stringValue = (string)constant.Value!;
@@ -575,5 +592,47 @@ public class CodeService : ICodeService {
       lifecycleHooks.ToImmutableArray(),
       powerUpHooksByFullName.ToImmutableDictionary()
     );
+  }
+
+  public ImmutableArray<ContainingType> GetContainingTypes(
+    INamedTypeSymbol? symbol,
+    TypeDeclarationSyntax fallbackType
+  ) {
+    if (symbol is not INamedTypeSymbol typeSymbol) {
+      return ImmutableArray<ContainingType>.Empty;
+    }
+
+    var containingTypes = new List<ContainingType>();
+    var containingType = typeSymbol.ContainingType;
+
+    while (containingType is not null) {
+      var kind = ContainingTypeKind.Class;
+
+      if (containingType.IsRecord) {
+        kind = ContainingTypeKind.Record;
+      }
+
+      var isPartial = containingType.DeclaringSyntaxReferences.Any(
+        syntaxRef => syntaxRef.GetSyntax() is TypeDeclarationSyntax typeDecl &&
+          typeDecl.Modifiers.Any(
+            modifier => modifier.ValueText == "partial"
+          )
+      );
+
+      var accessibility = containingType.DeclaredAccessibility;
+
+      containingTypes.Add(
+        new ContainingType(
+          FullName: GetNameWithGenerics(containingType, fallbackType),
+          Kind: kind,
+          Accessibility: accessibility,
+          IsPartial: true
+        )
+      );
+
+      containingType = containingType.ContainingType;
+    }
+
+    return containingTypes.Reverse<ContainingType>().ToImmutableArray();
   }
 }

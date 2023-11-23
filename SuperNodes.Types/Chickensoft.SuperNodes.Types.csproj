@@ -8,6 +8,7 @@
     <CopyAllFiles>true</CopyAllFiles>
     <RootNamespace>SuperNodes.Types</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugType>portable</DebugType>
 
     <Title>SuperNodes Types</Title>
@@ -34,9 +35,5 @@
     <None Include="../README.md" Pack="true" PackagePath="\" />
     <None Include="../LICENSE" Pack="true" PackagePath="\" />
     <None Include="./icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="GodotSharp" Version="4.0.2" />
   </ItemGroup>
 </Project>

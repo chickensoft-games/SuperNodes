@@ -27,13 +27,13 @@ public interface IPowerUpsRepo {
   /// node candidate provided by the generation context.
   /// context.
   /// </summary>
-  /// <param name="classDeclaration">PowerUp class declaration syntax node.
+  /// <param name="typeDeclaration">PowerUp class declaration syntax node.
   /// </param>
   /// <param name="symbol">Named type symbol representing the class declaration
   /// syntax node, if any.</param>
   /// <returns>A PowerUp model.</returns>
   PowerUp GetPowerUp(
-    ClassDeclarationSyntax classDeclaration,
+    TypeDeclarationSyntax typeDeclaration,
     INamedTypeSymbol? symbol
   );
 }
@@ -55,31 +55,32 @@ public class PowerUpsRepo : IPowerUpsRepo {
 
   public bool IsPowerUpSyntaxCandidate(
     SyntaxNode node
-  ) => node is ClassDeclarationSyntax classDeclaration && classDeclaration
-    .AttributeLists
-    .SelectMany(list => list.Attributes)
-    .Any(
-      attribute
-        => attribute.Name.ToString() == Constants.POWER_UP_ATTRIBUTE_NAME
-    );
+  ) => node is RecordDeclarationSyntax or ClassDeclarationSyntax &&
+      node is TypeDeclarationSyntax typeDeclaration && typeDeclaration
+      .AttributeLists
+      .SelectMany(list => list.Attributes)
+      .Any(
+        attribute
+          => attribute.Name.ToString() == Constants.POWER_UP_ATTRIBUTE_NAME
+      );
 
   public PowerUp GetPowerUp(
-    ClassDeclarationSyntax classDeclaration,
+    TypeDeclarationSyntax typeDeclaration,
     INamedTypeSymbol? symbol
   ) {
-    var name = classDeclaration.Identifier.ValueText;
+    var name = typeDeclaration.Identifier.ValueText;
     var fullName = CodeService.GetNameFullyQualified(symbol, name);
-    var baseClass =
+    var baseType =
       CodeService.GetBaseTypeFullyQualified(symbol, Constants.BaseClass);
-    var typeParameters = CodeService.GetTypeParameters(classDeclaration);
+    var typeParameters = CodeService.GetTypeParameters(typeDeclaration);
     var interfaces = CodeService.GetVisibleInterfacesFullyQualified(
-      classDeclaration, symbol
+      typeDeclaration, symbol
     );
     var @namespace = CodeService.GetContainingNamespace(symbol);
 
     var usings = CodeService.GetUsings(symbol);
 
-    var hasOnPowerUpMethod = classDeclaration.Members.Any(
+    var hasOnPowerUpMethod = typeDeclaration.Members.Any(
       member => member is MethodDeclarationSyntax method
         && method.Identifier.ValueText == $"On{name}"
     );
@@ -90,11 +91,11 @@ public class PowerUpsRepo : IPowerUpsRepo {
       Namespace: @namespace,
       Name: name,
       FullName: fullName,
-      Location: classDeclaration.GetLocation(),
-      BaseClass: baseClass,
+      Location: typeDeclaration.GetLocation(),
+      BaseClass: baseType,
       TypeParameters: typeParameters,
       Interfaces: interfaces,
-      Source: classDeclaration.ToString(),
+      Source: typeDeclaration.ToString(),
       PropsAndFields: CodeService.GetPropsAndFields(members),
       Usings: usings,
       HasOnPowerUpMethod: hasOnPowerUpMethod

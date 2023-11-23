@@ -100,7 +100,7 @@ public class SuperNodesRepoTest {
       cs => cs.GetAttribute(symbol, Constants.SUPER_NODE_ATTRIBUTE_NAME_FULL)
     ).Returns((AttributeData?)null);
 
-    codeService.Setup(cs => cs.GetLifecycleHooks(null))
+    codeService.Setup(cs => cs.GetLifecycleHooks(null, true))
       .Returns(LifecycleHooksResponse.Empty);
 
     var members = ImmutableArray<ISymbol>.Empty;

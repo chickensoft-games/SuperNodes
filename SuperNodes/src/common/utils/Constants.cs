@@ -176,6 +176,8 @@ public class Constants {
 
   public const string SUPER_NODE_ATTRIBUTE_NAME = "SuperNode";
   public const string SUPER_NODE_ATTRIBUTE_NAME_FULL = "SuperNodeAttribute";
+  public const string SUPER_OBJECT_ATTRIBUTE_NAME = "SuperObject";
+  public const string SUPER_OBJECT_ATTRIBUTE_NAME_FULL = "SuperObjectAttribute";
 
   public const string POWER_UP_ATTRIBUTE_NAME
     = "PowerUp";

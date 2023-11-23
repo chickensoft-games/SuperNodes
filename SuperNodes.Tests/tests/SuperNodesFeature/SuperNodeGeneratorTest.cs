@@ -28,7 +28,7 @@ public class SuperNodeGeneratorTest {
     var notificationHandlers = ImmutableArray.Create<string>();
     var powerUps = ImmutableDictionary.Create<string, PowerUp>();
 
-    var item = new GenerationItem(
+    var item = new SuperNodeGenerationItem(
       SuperNode: new SuperNode(
         Namespace: "global::Tests",
         Name: "TestSuperNode",
@@ -41,7 +41,8 @@ public class SuperNodeGeneratorTest {
         HasPartialNotificationMethod: true,
         HasOnNotificationMethodHandler: true,
         PropsAndFields: ImmutableArray<PropOrField>.Empty,
-        Usings: ImmutableHashSet<string>.Empty
+        Usings: ImmutableHashSet<string>.Empty,
+        ContainingTypes: ImmutableArray<ContainingType>.Empty
       ),
       PowerUps: powerUps
     );
@@ -73,7 +74,6 @@ public class SuperNodeGeneratorTest {
     source.ShouldBe("""
     #pragma warning disable
     #nullable enable
-    using Godot;
     using SuperNodes.Types;
 
     namespace global::Tests {
@@ -194,10 +194,11 @@ public class SuperNodeGeneratorTest {
       HasPartialNotificationMethod: true,
       HasOnNotificationMethodHandler: true,
       PropsAndFields: propsAndFields,
-      Usings: usings
+      Usings: usings,
+      ContainingTypes: ImmutableArray<ContainingType>.Empty
     );
 
-    var item = new GenerationItem(
+    var item = new SuperNodeGenerationItem(
       SuperNode: superNode,
       PowerUps: powerUps
     );
@@ -250,7 +251,7 @@ public class SuperNodeGeneratorTest {
       )
     ).Returns(setPropertyOrFieldFn);
 
-    var source = generator.GenerateSuperNodeStatic(item, appliedPowerUps);
+    var source = generator.GenerateStaticReflection(item, appliedPowerUps);
 
     source.ShouldBe("""
     #pragma warning disable

@@ -10,6 +10,18 @@ using Xunit;
 
 public class TypesTest {
   [Fact]
+  public void SuperObjectAttributeDefaultInitializer() {
+    var attribute = new SuperObjectAttribute();
+    attribute.Args.ShouldBeEmpty();
+  }
+
+  [Fact]
+  public void SuperObjectAttributeInitializer() {
+    var attribute = new SuperObjectAttribute(typeof(int));
+    attribute.Args.ShouldBe(new object[] { typeof(int) });
+  }
+
+  [Fact]
   public void SuperNodeAttributeDefaultInitializer() {
     var attribute = new SuperNodeAttribute();
     attribute.Args.ShouldBeEmpty();
@@ -68,28 +80,28 @@ public class TypesTest {
   }
 }
 
-public class NodeExtensionsTest {
+public class ObjectExtensionsTest {
   [Fact]
   public void TypeParam() {
-    NodeExtensions.TypeParam(default!, typeof(int)).ShouldBe("int");
-    NodeExtensions.TypeParam(default!, typeof(string)).ShouldBe("string");
-    NodeExtensions.TypeParam(default!, typeof(bool)).ShouldBe("bool");
-    NodeExtensions.TypeParam(default!, typeof(byte)).ShouldBe("byte");
-    NodeExtensions.TypeParam(default!, typeof(sbyte)).ShouldBe("sbyte");
-    NodeExtensions.TypeParam(default!, typeof(char)).ShouldBe("char");
-    NodeExtensions.TypeParam(default!, typeof(decimal)).ShouldBe("decimal");
-    NodeExtensions.TypeParam(default!, typeof(double)).ShouldBe("double");
-    NodeExtensions.TypeParam(default!, typeof(float)).ShouldBe("float");
-    NodeExtensions.TypeParam(default!, typeof(uint)).ShouldBe("uint");
-    NodeExtensions.TypeParam(default!, typeof(nuint)).ShouldBe("nuint");
-    NodeExtensions.TypeParam(default!, typeof(long)).ShouldBe("long");
-    NodeExtensions.TypeParam(default!, typeof(ulong)).ShouldBe("ulong");
-    NodeExtensions.TypeParam(default!, typeof(short)).ShouldBe("short");
-    NodeExtensions.TypeParam(default!, typeof(ushort)).ShouldBe("ushort");
-    NodeExtensions.TypeParam(default!, typeof(object)).ShouldBe("object");
-    NodeExtensions.TypeParam(default!, typeof(TestAttribute))
+    ObjectExtensions.TypeParam(default!, typeof(int)).ShouldBe("int");
+    ObjectExtensions.TypeParam(default!, typeof(string)).ShouldBe("string");
+    ObjectExtensions.TypeParam(default!, typeof(bool)).ShouldBe("bool");
+    ObjectExtensions.TypeParam(default!, typeof(byte)).ShouldBe("byte");
+    ObjectExtensions.TypeParam(default!, typeof(sbyte)).ShouldBe("sbyte");
+    ObjectExtensions.TypeParam(default!, typeof(char)).ShouldBe("char");
+    ObjectExtensions.TypeParam(default!, typeof(decimal)).ShouldBe("decimal");
+    ObjectExtensions.TypeParam(default!, typeof(double)).ShouldBe("double");
+    ObjectExtensions.TypeParam(default!, typeof(float)).ShouldBe("float");
+    ObjectExtensions.TypeParam(default!, typeof(uint)).ShouldBe("uint");
+    ObjectExtensions.TypeParam(default!, typeof(nuint)).ShouldBe("nuint");
+    ObjectExtensions.TypeParam(default!, typeof(long)).ShouldBe("long");
+    ObjectExtensions.TypeParam(default!, typeof(ulong)).ShouldBe("ulong");
+    ObjectExtensions.TypeParam(default!, typeof(short)).ShouldBe("short");
+    ObjectExtensions.TypeParam(default!, typeof(ushort)).ShouldBe("ushort");
+    ObjectExtensions.TypeParam(default!, typeof(object)).ShouldBe("object");
+    ObjectExtensions.TypeParam(default!, typeof(TestAttribute))
       .ShouldBe("global::SuperNodes.Types.Tests.TestAttribute");
-    NodeExtensions.TypeParam(default!, new TestType())
+    ObjectExtensions.TypeParam(default!, new TestType())
       .ShouldBe(nameof(TestType));
   }
 }

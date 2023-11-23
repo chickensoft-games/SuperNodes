@@ -2,8 +2,10 @@ namespace SuperNodes.Tests.Common.Services;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using DeepEqual.Syntax;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Moq;
 using Shouldly;
@@ -777,6 +779,77 @@ public class BasicSyntaxOperationsServiceTest {
         }.ToImmutableDictionary()
       )
     );
+  }
+
+  [Fact]
+  public void GetContainingTypesGetsTypes() {
+    var code = """
+      namespace Tests {
+        using System;
+
+        public partial class TypeA {
+          public record TypeB {
+            public partial struct TypeC { }
+          }
+        }
+      }
+    """;
+
+    var node = Tester.Parse<StructDeclarationSyntax, INamedTypeSymbol>(
+      code, out var symbol
+    );
+
+    var containingTypes = new List<ContainingType>() {
+      new ContainingType(
+        FullName: "TypeA",
+        Kind: ContainingTypeKind.Class,
+        Accessibility: Accessibility.Public,
+        IsPartial: true
+      ),
+      new ContainingType(
+        FullName: "TypeB",
+        Kind: ContainingTypeKind.Record,
+        Accessibility: Accessibility.Public,
+        IsPartial: true
+      ),
+    }.ToImmutableArray();
+
+    var service = new CodeService();
+
+    service.GetContainingTypes(null, node).ShouldBeEmpty();
+    var result = service.GetContainingTypes(symbol, node);
+
+    result.ShouldDeepEqual(containingTypes);
+  }
+
+  [Fact]
+  public void GetContainingTypeCoversNoSyntax() {
+    var service = new CodeService();
+
+    var symbol = new Mock<INamedTypeSymbol>();
+    var containingSymbol = new Mock<INamedTypeSymbol>();
+
+    symbol.Setup(s => s.Name).Returns("Test");
+    symbol.Setup(s => s.ContainingType).Returns(containingSymbol.Object);
+
+    containingSymbol
+      .Setup(s => s.DeclaringSyntaxReferences)
+      .Returns(new List<SyntaxReference>() {
+        new Mock<SyntaxReference>().Object
+       }.ToImmutableArray()
+      );
+
+    containingSymbol
+      .Setup(s => s.TypeParameters)
+      .Returns(ImmutableArray.Create<ITypeParameterSymbol>());
+
+    var fallbackSyntax = SyntaxFactory
+      .ParseCompilationUnit("class Test { }")
+      .DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+
+    service
+      .GetContainingTypes(symbol.Object, fallbackSyntax)
+      .ShouldNotBeEmpty();
   }
 }
 

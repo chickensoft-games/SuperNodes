@@ -23,6 +23,14 @@ public interface ISuperNodesRepo {
   bool IsSuperNodeSyntaxCandidate(SyntaxNode node);
 
   /// <summary>
+  /// Determines whether or not a syntax node is a SuperObject.
+  /// </summary>
+  /// <param name="node">Syntax node to check.</param>
+  /// <returns>True if the syntax node is a class or record declaration with a
+  /// SuperObject attribute.</returns>
+  bool IsSuperObjectSyntaxCandidate(SyntaxNode node);
+
+  /// <summary>
   /// Returns a model that represents a SuperNode based on the SuperNode syntax
   /// node candidate provided by the generation context.
   /// </summary>
@@ -33,6 +41,21 @@ public interface ISuperNodesRepo {
   /// <returns>A SuperNode model.</returns>
   SuperNode GetSuperNode(
     ClassDeclarationSyntax classDeclaration,
+    INamedTypeSymbol? symbol
+  );
+
+  /// <summary>
+  /// Returns a model that represents a SuperObject based on the SuperObject
+  /// syntax node candidate provided by the generation context.
+  /// </summary>
+  /// <param name="typeDeclaration">SuperObject class declaration syntax node or
+  /// record declaration syntax node.
+  /// </param>
+  /// <param name="symbol">Named type symbol representing the class declaration
+  /// syntax node, if any.</param>
+  /// <returns>A SuperNode model.</returns>
+  SuperObject GetSuperObject(
+    TypeDeclarationSyntax typeDeclaration,
     INamedTypeSymbol? symbol
   );
 }
@@ -62,6 +85,16 @@ public class SuperNodesRepo : ISuperNodesRepo {
       attribute => attribute.Name.ToString()
         == Constants.SUPER_NODE_ATTRIBUTE_NAME
     );
+
+  public bool IsSuperObjectSyntaxCandidate(SyntaxNode node)
+    => node is RecordDeclarationSyntax or ClassDeclarationSyntax &&
+      node is TypeDeclarationSyntax typeDeclaration &&
+      typeDeclaration.AttributeLists.SelectMany(
+        list => list.Attributes
+      ).Any(
+        attribute => attribute.Name.ToString()
+          == Constants.SUPER_OBJECT_ATTRIBUTE_NAME
+      );
 
   public SuperNode GetSuperNode(
     ClassDeclarationSyntax classDeclaration,
@@ -107,6 +140,8 @@ public class SuperNodesRepo : ISuperNodesRepo {
 
     var members = CodeService.GetMembers(symbol);
     var usings = CodeService.GetUsings(symbol);
+    var containingTypes =
+      CodeService.GetContainingTypes(symbol, classDeclaration);
 
     return new SuperNode(
       Namespace: @namespace,
@@ -120,7 +155,48 @@ public class SuperNodesRepo : ISuperNodesRepo {
       HasPartialNotificationMethod: hasPartialNotificationMethod,
       HasOnNotificationMethodHandler: hasOnNotificationMethodHandler,
       PropsAndFields: CodeService.GetPropsAndFields(members),
-      Usings: usings
+      Usings: usings,
+      ContainingTypes: containingTypes
+    );
+  }
+
+  public SuperObject GetSuperObject(
+    TypeDeclarationSyntax typeDeclaration,
+    INamedTypeSymbol? symbol
+  ) {
+    var name = CodeService.GetNameWithGenerics(symbol, typeDeclaration);
+    var nameWithoutGenerics = CodeService.GetName(symbol, typeDeclaration);
+    var @namespace = CodeService.GetContainingNamespace(symbol);
+    var baseClasses = CodeService.GetBaseClassHierarchy(symbol);
+
+    var superObjectAttribute = CodeService.GetAttribute(
+      symbol,
+      Constants.SUPER_OBJECT_ATTRIBUTE_NAME_FULL
+    );
+
+    var lifecycleHooksResponse = CodeService.GetLifecycleHooks(
+      superObjectAttribute, includeLifecycleMethodStrings: false
+    );
+
+    var members = CodeService.GetMembers(symbol);
+    var usings = CodeService.GetUsings(symbol);
+    var containingTypes =
+      CodeService.GetContainingTypes(symbol, typeDeclaration);
+
+    var isRecord = typeDeclaration is RecordDeclarationSyntax;
+
+    return new SuperObject(
+      Namespace: @namespace,
+      Name: name,
+      NameWithoutGenerics: nameWithoutGenerics,
+      Location: typeDeclaration.GetLocation(),
+      BaseClasses: baseClasses,
+      LifecycleHooks: lifecycleHooksResponse.LifecycleHooks,
+      PowerUpHooksByFullName: lifecycleHooksResponse.PowerUpHooksByFullName,
+      PropsAndFields: CodeService.GetPropsAndFields(members),
+      Usings: usings,
+      IsRecord: isRecord,
+      ContainingTypes: containingTypes
     );
   }
 }

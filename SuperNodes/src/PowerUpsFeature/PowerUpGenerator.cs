@@ -14,12 +14,14 @@ public interface IPowerUpGenerator {
   IPowerUpGeneratorService PowerUpGeneratorService { get; }
 
   /// <summary>
-  /// Generates an applied PowerUp implementation on a specific SuperNode.
+  /// Generates an applied PowerUp implementation on a specific SuperNode or
+  /// SuperObject.
   /// </summary>
   /// <param name="powerUp">PowerUp to generate.</param>
-  /// <param name="node">SuperNode to apply the PowerUp to.</param>
+  /// <param name="node">SuperNode or SuperObject to apply the PowerUp to.
+  /// </param>
   /// <returns>Generated source string.</returns>
-  string GeneratePowerUp(PowerUp powerUp, SuperNode node);
+  string GeneratePowerUp(PowerUp powerUp, SuperBase node);
 }
 
 public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
@@ -29,7 +31,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     PowerUpGeneratorService = powerUpGeneratorService;
   }
 
-  public string GeneratePowerUp(PowerUp powerUp, SuperNode node) {
+  public string GeneratePowerUp(PowerUp powerUp, SuperBase node) {
     // Edit the pieces of the user's power-up needed to make it suitable to be
     // a partial class of the specific node script it's applied to.
 
@@ -45,13 +47,13 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     }
 
     var root = (CompilationUnitSyntax)tree.GetRoot();
-    var classDeclaration = (ClassDeclarationSyntax)root.Members.First();
+    var typeDeclaration = (TypeDeclarationSyntax)root.Members.First();
     var interfaces = powerUp.Interfaces;
 
     // Strip [PowerUp] attribute off the class declaration
-    var newClassDeclaration = classDeclaration.WithAttributeLists(
+    var newTypeDeclaration = typeDeclaration.WithAttributeLists(
       SyntaxFactory.List(
-        classDeclaration.AttributeLists.Where(
+        typeDeclaration.AttributeLists.Where(
           attributeList => attributeList.Attributes.All(
             attribute => attribute.Name.ToString()
               != Constants.POWER_UP_ATTRIBUTE_NAME
@@ -76,7 +78,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     // a parameterless constructor to satisfy Godot's node requirements.
     .WithMembers(
       SyntaxFactory.List(
-        classDeclaration.Members.Where(
+        typeDeclaration.Members.Where(
           member => member is not ConstructorDeclarationSyntax
         )
       )
@@ -92,7 +94,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     //
     // Static inheritance is available in .NET 7. Eventually, we will support
     // it so PowerUps don't have to declare stubs.
-    var membersToRemove = newClassDeclaration.Members.Where(
+    var membersToRemove = newTypeDeclaration.Members.Where(
       member => member.AttributeLists.Any(
         attributeList => attributeList.Attributes.Any(
           attribute => attribute.Name.ToString() == Constants.POWER_UP_IGNORE_ATTRIBUTE_NAME
@@ -100,13 +102,13 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
       ) && member is not null
     );
 
-    newClassDeclaration = newClassDeclaration.RemoveNodes(
+    newTypeDeclaration = newTypeDeclaration.RemoveNodes(
       membersToRemove, SyntaxRemoveOptions.KeepExteriorTrivia
     )!;
 
     if (interfaces.Length > 0) {
       // Add only interfaces back to the base list.
-      newClassDeclaration = newClassDeclaration.WithBaseList(
+      newTypeDeclaration = newTypeDeclaration.WithBaseList(
         SyntaxFactory.BaseList(
           SyntaxFactory.SeparatedList<BaseTypeSyntax>(
             interfaces.Select(
@@ -125,7 +127,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     }
 
     // Edit the user's power up class tree based on the above changes.
-    root = root.ReplaceNode(classDeclaration, newClassDeclaration);
+    root = root.ReplaceNode(typeDeclaration, newTypeDeclaration);
     tree = tree.WithRootAndOptions(root, tree.Options);
 
     var powerUpRewriter = PowerUpGeneratorService.CreatePowerUpRewriter(
@@ -139,7 +141,7 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
     );
 
     var allUsings = powerUp.Usings.Union(
-      new string[] { "Godot", "SuperNodes.Types" }
+      new string[] { "SuperNodes.Types" }
     ).Distinct();
 
     var usings = allUsings
@@ -152,12 +154,38 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
       )
       .Select(@using => $"using {@using};").ToImmutableArray();
 
+    var prefixSource = "";
+    var suffixSource = "";
+    var containingTypes = 0;
+
+    foreach (var containingType in node.ContainingTypes) {
+      containingTypes++;
+      // Generate nested type containers to place source code in if the
+      // type is nested.
+      var accessibilityKeywords = containingType.AccessibilityKeywords;
+      var typeDeclarationKeyword = containingType.TypeDeclarationKeyword;
+      var fullName = containingType.FullName;
+
+      prefixSource +=
+        Tab(containingTypes) + $"{accessibilityKeywords} " +
+        $"partial {typeDeclarationKeyword} {fullName} {{\n";
+
+      suffixSource += Tab(containingTypes) + "}\n";
+    }
+
+    prefixSource = prefixSource.TrimEnd('\n');
+
     // Get the modified source code of the PowerUp itself and format it.
-    var source = tree
-      .GetRoot()
-      .NormalizeWhitespace("  ", "\n", true)
-      .ToFullString()
-      .NormalizeLineEndings("\n").Split('\n').ToImmutableArray();
+    var source = string.Join(
+      "\n",
+      tree
+        .GetRoot()
+        .NormalizeWhitespace("  ", "\n", true)
+        .ToFullString()
+        .NormalizeLineEndings("\n")
+        .Split('\n')
+        .Select(line => Tab(node.ContainingTypes.Length + 1) + line)
+    );
 
     return Format($$"""
     #pragma warning disable
@@ -168,7 +196,9 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
       node.Namespace is not null,
       $$"""namespace {{node.Namespace}} {"""
     )}}
-      {{source}}
+    {{prefixSource}}
+    {{source}}
+    {{suffixSource}}
     {{If(node.Namespace is not null, "}")}}
     #nullable disable
     #pragma warning restore
