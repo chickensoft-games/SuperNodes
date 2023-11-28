@@ -48,20 +48,20 @@ public class Constants {
       ["OnEnterTree"] = new LifecycleMethod(
         "NotificationEnterTree", VOID, NoArgs
       ),
-      ["OnWmWindowFocusIn"] = new LifecycleMethod(
-        "NotificationWmWindowFocusIn", VOID, NoArgs
+      ["OnWMWindowFocusIn"] = new LifecycleMethod(
+        "NotificationWMWindowFocusIn", VOID, NoArgs
       ),
-      ["OnWmWindowFocusOut"] = new LifecycleMethod(
-        "NotificationWmWindowFocusOut", VOID, NoArgs
+      ["OnWMWindowFocusOut"] = new LifecycleMethod(
+        "NotificationWMWindowFocusOut", VOID, NoArgs
       ),
-      ["OnWmCloseRequest"] = new LifecycleMethod(
-        "NotificationWmCloseRequest", VOID, NoArgs
+      ["OnWMCloseRequest"] = new LifecycleMethod(
+        "NotificationWMCloseRequest", VOID, NoArgs
       ),
-      ["OnWmSizeChanged"] = new LifecycleMethod(
-        "NotificationWmSizeChanged", VOID, NoArgs
+      ["OnWMSizeChanged"] = new LifecycleMethod(
+        "NotificationWMSizeChanged", VOID, NoArgs
       ),
-      ["OnWmDpiChange"] = new LifecycleMethod(
-        "NotificationWmDpiChange", VOID, NoArgs
+      ["OnWMDpiChange"] = new LifecycleMethod(
+        "NotificationWMDpiChange", VOID, NoArgs
       ),
       ["OnVpMouseEnter"] = new LifecycleMethod(
         "NotificationVpMouseEnter", VOID, NoArgs
@@ -75,8 +75,8 @@ public class Constants {
       ["OnTranslationChanged"] = new LifecycleMethod(
         "NotificationTranslationChanged", VOID, NoArgs
       ),
-      ["OnWmAbout"] = new LifecycleMethod(
-        "NotificationWmAbout", VOID, NoArgs
+      ["OnWMAbout"] = new LifecycleMethod(
+        "NotificationWMAbout", VOID, NoArgs
       ),
       ["OnCrash"] = new LifecycleMethod(
         "NotificationCrash", VOID, NoArgs
@@ -99,14 +99,14 @@ public class Constants {
       ["OnTextServerChanged"] = new LifecycleMethod(
         "NotificationTextServerChanged", VOID, NoArgs
       ),
-      ["OnWmMouseExit"] = new LifecycleMethod(
-        "NotificationWmMouseExit", VOID, NoArgs
+      ["OnWMMouseExit"] = new LifecycleMethod(
+        "NotificationWMMouseExit", VOID, NoArgs
       ),
-      ["OnWmMouseEnter"] = new LifecycleMethod(
-        "NotificationWmMouseEnter", VOID, NoArgs
+      ["OnWMMouseEnter"] = new LifecycleMethod(
+        "NotificationWMMouseEnter", VOID, NoArgs
       ),
-      ["OnWmGoBackRequest"] = new LifecycleMethod(
-        "NotificationWmGoBackRequest", VOID, NoArgs
+      ["OnWMGoBackRequest"] = new LifecycleMethod(
+        "NotificationWMGoBackRequest", VOID, NoArgs
       ),
       ["OnEditorPreSave"] = new LifecycleMethod(
         "NotificationEditorPreSave", VOID, NoArgs
