@@ -94,7 +94,15 @@ public class PowerUpGeneratorTest {
       HasPartialNotificationMethod: true,
       HasOnNotificationMethodHandler: true,
       PropsAndFields: ImmutableArray<PropOrField>.Empty,
-      Usings: ImmutableHashSet<string>.Empty
+      Usings: ImmutableHashSet<string>.Empty,
+      ContainingTypes: new ContainingType[] {
+        new ContainingType(
+          FullName: "TestContainingType",
+          Kind: ContainingTypeKind.Class,
+          Accessibility: Accessibility.Public,
+          IsPartial: true
+        )
+      }.ToImmutableArray()
     );
 
     var genService = new Mock<IPowerUpGeneratorService>();
@@ -136,20 +144,23 @@ public class PowerUpGeneratorTest {
     using SuperNodes.Types;
 
     namespace Tests {
-      partial class TestSuperNode : global::Tests.ITestPowerUp<bool, int>
-      {
-        public string AddedProperty { get; set; } = "Property";
-        private readonly int _addedField = 10;
-        public static int MyNumber { get; set; } = 42;
-        public void OnTestPowerUp(int what)
+      public partial class TestContainingType {
+        partial class TestSuperNode : global::Tests.ITestPowerUp<bool, int>
         {
-          TestSuperNode.MyNumber = 666;
-          if (what == NotificationReady)
+          public string AddedProperty { get; set; } = "Property";
+          private readonly int _addedField = 10;
+          public static int MyNumber { get; set; } = 42;
+          public void OnTestPowerUp(int what)
           {
-            GD.Print("Hello, TestPowerUp!");
+            TestSuperNode.MyNumber = 666;
+            if (what == NotificationReady)
+            {
+              GD.Print("Hello, TestPowerUp!");
+            }
           }
         }
       }
+
     }
     #nullable disable
     #pragma warning restore

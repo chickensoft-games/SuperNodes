@@ -3,17 +3,43 @@ namespace SuperNodes.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Godot;
 
 /// <summary>
-/// SuperNode attribute. Add this to a Godot object class to use
-/// functionality from other compatible source generators.
+/// SuperObject attribute. Add this to a plain C# record or class to mixin
+/// functionality from PowerUps (mixins).
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class SuperObjectAttribute : Attribute {
+  /// <summary>
+  /// PowerUps to "mixin" to the object.
+  /// </summary>
+  public Type[] Args { get; }
+
+  /// <summary>
+  /// SuperObject attribute. Add this to a Godot object class to use
+  /// functionality from other compatible source generators.
+  /// </summary>
+  public SuperObjectAttribute() {
+    Args = Array.Empty<Type>();
+  }
+
+  /// <summary>
+  /// SuperObject attribute. Add this to a Godot object class to mixin PowerUps.
+  /// </summary>
+  /// <param name="args">Types of PowerUps to "mixin" to the object.</param>
+  public SuperObjectAttribute(params Type[] args) {
+    Args = args;
+  }
+}
+
+/// <summary>
+/// SuperNode attribute. Add this to a Godot object class or script to mixin
+/// functionality from PowerUps (mixins).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class SuperNodeAttribute : Attribute {
   /// <summary>
-  /// Source generator lifecycle methods and/or PowerUps to invoke from
-  /// <see cref="GodotObject._Notification(int what)" />.
+  /// PowerUps to "mixin" to the object.
   /// </summary>
   public object[] Args { get; }
 
@@ -26,13 +52,8 @@ public sealed class SuperNodeAttribute : Attribute {
   }
 
   /// <summary>
-  /// SuperNode attribute. Add this to a Godot object class to use
-  /// functionality from other compatible source generators.
-  /// <br />
-  /// Compatible source generator lifecycle methods or PowerUps that will
-  /// be invoked from
-  /// <see cref="GodotObject._Notification(int what)"/> in the order
-  /// specified here.
+  /// SuperNode attribute. Add this to a Godot object class to mixin PowerUps
+  /// and/or call the names of methods denoted by strings.
   /// </summary>
   /// <param name="args">Compatible source generator lifecycle method
   /// names or the types of PowerUps.</param>
@@ -120,7 +141,10 @@ public record struct ScriptPropertyOrField(
   IDictionary<string, ImmutableArray<ScriptAttributeDescription>> Attributes
 );
 
-public interface ISuperNode {
+/// <summary>
+/// Base interface of <see cref="ISuperNode" /> and <see cref="ISuperItem" />.
+/// </summary>
+public interface ISuperItem {
   /// <summary>
   /// A map of all properties and fields in this node script from
   /// generated identifier name to their type, attribute, and
@@ -174,7 +198,18 @@ public interface ISuperNode {
   void SetScriptPropertyOrField(string scriptProperty, dynamic? value);
 }
 
-public static class NodeExtensions {
+/// <summary>
+/// Interface added to all super objects.
+/// </summary>
+public interface ISuperObject : ISuperItem { }
+
+/// <summary>
+/// Interface added to all super nodes.
+/// </summary>
+public interface ISuperNode : ISuperItem { }
+
+/// <summary>Extensions added to all objects.</summary>
+public static class ObjectExtensions {
   /// <summary>
   /// Returns the simple type name of a type parameter's type if the represented
   /// type is not a built-in type. Otherwise, returns the built-in type name.
@@ -188,7 +223,7 @@ public static class NodeExtensions {
   /// <exception cref = "InvalidOperationException">Thrown if an unrecognized
   /// primitive type is encountered.</exception>
   /// <returns>Simple name of the type (or it's built-in type).</returns>
-  public static string TypeParam(this Node node, Type type) {
+  public static string TypeParam(this object node, Type type) {
     var fullName = type.FullName;
     switch (fullName) {
       case "System.Boolean":

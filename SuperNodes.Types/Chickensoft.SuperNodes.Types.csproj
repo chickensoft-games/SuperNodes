@@ -8,10 +8,11 @@
     <CopyAllFiles>true</CopyAllFiles>
     <RootNamespace>SuperNodes.Types</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugType>portable</DebugType>
 
     <Title>SuperNodes Types</Title>
-    <Version>1.6.1</Version>
+    <Version>1.7.0</Version>
     <Description>Runtime types for SuperNodes.</Description>
     <Copyright>© 2023 Chickensoft</Copyright>
     <Authors>Chickensoft</Authors>
@@ -34,9 +35,5 @@
     <None Include="../README.md" Pack="true" PackagePath="\" />
     <None Include="../LICENSE" Pack="true" PackagePath="\" />
     <None Include="./icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="GodotSharp" Version="4.0.2" />
   </ItemGroup>
 </Project>

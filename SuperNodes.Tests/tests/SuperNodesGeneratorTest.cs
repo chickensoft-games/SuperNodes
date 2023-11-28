@@ -32,11 +32,17 @@ public class SuperNodesGeneratorTest {
       public void OnReady() { }
     }
 
+    [SuperObject(typeof(PlainGeneralFeaturePowerUp))]
+    public partial record PlainObject { }
+
     [PowerUp]
     public partial class GeneralFeaturePowerUp<T>
       : Node, IGeneralFeaturePowerUp<T> {
       T IGeneralFeaturePowerUp<T>.TestValue { get; } = default!;
     }
+
+    [PowerUp]
+    public record PlainGeneralFeaturePowerUp { }
 
     public interface IGeneralFeaturePowerUp<T> {
       T TestValue { get; }
@@ -50,7 +56,7 @@ public class SuperNodesGeneratorTest {
     var result = Tester.Generate(source);
 
     result.Diagnostics.ShouldBeEmpty();
-    result.Outputs.Count.ShouldBe(3);
+    result.Outputs.Count.ShouldBe(5);
   }
 
   [Fact]

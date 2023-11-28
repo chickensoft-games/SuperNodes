@@ -81,14 +81,26 @@ public partial class SuperNodesGenerator
       }
     );
 
+    var superObjectCandidates = context.SyntaxProvider.CreateSyntaxProvider(
+      predicate: (SyntaxNode node, CancellationToken _)
+        => SuperNodesRepo.IsSuperObjectSyntaxCandidate(node),
+      transform: (GeneratorSyntaxContext context, CancellationToken _) => {
+        var typeDeclaration = (TypeDeclarationSyntax)context.Node;
+        return SuperNodesRepo.GetSuperObject(
+          typeDeclaration,
+          context.SemanticModel.GetDeclaredSymbol(typeDeclaration)
+        );
+      }
+    );
+
     var powerUpCandidates = context.SyntaxProvider.CreateSyntaxProvider(
       predicate: (SyntaxNode node, CancellationToken _)
         => PowerUpsRepo.IsPowerUpSyntaxCandidate(node),
       transform: (GeneratorSyntaxContext context, CancellationToken _) => {
-        var classDeclaration = (ClassDeclarationSyntax)context.Node;
+        var typeDeclaration = (TypeDeclarationSyntax)context.Node;
         return PowerUpsRepo.GetPowerUp(
-          classDeclaration,
-          context.SemanticModel.GetDeclaredSymbol(classDeclaration)
+          typeDeclaration,
+          context.SemanticModel.GetDeclaredSymbol(typeDeclaration)
         );
       }
     );
@@ -100,7 +112,7 @@ public partial class SuperNodesGenerator
     // among other things), but it allows for performance (supposedly, if
     // you use cache-friendly values). I'm not really sure how cache-friendly
     // this generator is yet, but we'll get there.
-    var generationItems = superNodeCandidates
+    var superNodeGenerationItems = superNodeCandidates
       .Combine(
         powerUpCandidates.Collect().Select(
           (s, _) => s.ToImmutableDictionary(
@@ -109,14 +121,36 @@ public partial class SuperNodesGenerator
           )
         )
       ).Select(
-        (item, _) => new GenerationItem(
+        (item, _) => new SuperNodeGenerationItem(
           SuperNode: item.Left,
           PowerUps: item.Right
         )
       );
 
+    // Also combines each super object candidate with the list of power ups and
+    // the compilation.
+    var superObjectGenerationItems = superObjectCandidates
+      .Combine(
+        powerUpCandidates.Collect().Select(
+          (s, _) => s.ToImmutableDictionary(
+            keySelector: (powerUp) => powerUp.FullName,
+            elementSelector: (powerUp) => powerUp
+          )
+        )
+      ).Select(
+        (item, _) => new SuperObjectGenerationItem(
+          SuperObject: item.Left,
+          PowerUps: item.Right
+        )
+      );
+
     context.RegisterSourceOutput(
-      source: generationItems,
+      source: superNodeGenerationItems,
+      action: Execute
+    );
+
+    context.RegisterSourceOutput(
+      source: superObjectGenerationItems,
       action: Execute
     );
 
@@ -146,41 +180,48 @@ public partial class SuperNodesGenerator
     SourceProductionContext context,
     GenerationItem item
   ) {
-    var superNode = item.SuperNode;
+    var superItem = item.SuperObj;
 
-    if (!superNode.HasPartialNotificationMethod) {
-      context.ReportDiagnostic(
-        Diagnostic.Create(
-          new DiagnosticDescriptor(
-            id: Constants.SUPER_NODE_MISSING_NOTIFICATION_METHOD,
-            title: "Missing partial `_Notification` method signature.",
-            messageFormat: "The SuperNode '{0}' is missing a partial " +
-              "signature for `_Notification(int what)`. Please add the " +
-              "following method signature to your class: " +
-              "`public override partial void _Notification(int what);`",
-            category: "SuperNode",
-            defaultSeverity: DiagnosticSeverity.Error,
-            isEnabledByDefault: true
-          ),
-          location: superNode.Location,
-          superNode.Name
+    if (item is SuperNodeGenerationItem superNodeGenerationItem) {
+      // Generate the stuff for a SuperNode that overrides _Notification and
+      // allows PowerUps to "hook" into Godot notifications.
+
+      var superNode = superNodeGenerationItem.SuperNode;
+
+      if (!superNode.HasPartialNotificationMethod) {
+        context.ReportDiagnostic(
+          Diagnostic.Create(
+            new DiagnosticDescriptor(
+              id: Constants.SUPER_NODE_MISSING_NOTIFICATION_METHOD,
+              title: "Missing partial `_Notification` method signature.",
+              messageFormat: "The SuperNode '{0}' is missing a partial " +
+                "signature for `_Notification(int what)`. Please add the " +
+                "following method signature to your class: " +
+                "`public override partial void _Notification(int what);`",
+              category: "SuperNode",
+              defaultSeverity: DiagnosticSeverity.Error,
+              isEnabledByDefault: true
+            ),
+            location: superItem.Location,
+            superItem.Name
+          )
+        );
+      }
+
+      context.AddSource(
+        $"{superItem.FilenamePrefix}.g.cs",
+        SourceText.From(
+          SuperNodeGenerator.GenerateSuperNode(superNodeGenerationItem),
+          Encoding.UTF8
         )
       );
     }
-
-    context.AddSource(
-      $"{superNode.FilenamePrefix}.g.cs",
-      SourceText.From(
-        SuperNodeGenerator.GenerateSuperNode(item),
-        Encoding.UTF8
-      )
-    );
 
     var powerUps = item.PowerUps;
     var appliedPowerUps = new List<PowerUp>();
 
     // See if the node has any power-ups.
-    foreach (var lifecycleHook in superNode.LifecycleHooks) {
+    foreach (var lifecycleHook in superItem.LifecycleHooks) {
       if (
         lifecycleHook is not PowerUpHook powerUpHook ||
         !item.PowerUps.ContainsKey(powerUpHook.FullName)
@@ -194,7 +235,7 @@ public partial class SuperNodesGenerator
 
       // make sure the node's base class hierarchy includes the power-up's
       // base class
-      var canApplyPowerUp = superNode.BaseClasses.Contains(powerUp.BaseClass);
+      var canApplyPowerUp = superItem.BaseClasses.Contains(powerUp.BaseClass);
 
       if (!canApplyPowerUp) {
         // Log a source generator error so the user knows they can't apply
@@ -211,9 +252,9 @@ public partial class SuperNodesGenerator
               defaultSeverity: DiagnosticSeverity.Error,
               isEnabledByDefault: true
             ),
-            location: superNode.Location,
+            location: superItem.Location,
             powerUp.Name,
-            superNode.Name,
+            superItem.Name,
             powerUp.BaseClass
           )
         );
@@ -223,18 +264,18 @@ public partial class SuperNodesGenerator
       appliedPowerUps.Add(powerUp);
 
       context.AddSource(
-        $"{superNode.FilenamePrefix}_{powerUp.Name}.g.cs",
+        $"{superItem.FilenamePrefix}_{powerUp.Name}.g.cs",
         SourceText.From(
-          PowerUpGenerator.GeneratePowerUp(powerUp, superNode),
+          PowerUpGenerator.GeneratePowerUp(powerUp, superItem),
           Encoding.UTF8
         )
       );
     }
 
     context.AddSource(
-      $"{superNode.FilenamePrefix}_Reflection.g.cs",
+      $"{superItem.FilenamePrefix}_Reflection.g.cs",
       SourceText.From(
-        SuperNodeGenerator.GenerateSuperNodeStatic(
+        SuperNodeGenerator.GenerateStaticReflection(
           item, appliedPowerUps.ToImmutableArray()
         ),
         Encoding.UTF8

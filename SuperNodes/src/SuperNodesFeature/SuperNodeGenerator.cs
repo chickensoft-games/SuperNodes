@@ -15,7 +15,7 @@ public interface ISuperNodeGenerator {
   /// and table of PowerUps.</param>
   /// <returns>Generated source string.</returns>
   string GenerateSuperNode(
-    GenerationItem item
+    SuperNodeGenerationItem item
   );
 
   /// <summary>
@@ -28,7 +28,7 @@ public interface ISuperNodeGenerator {
   /// <param name="appliedPowerUps">PowerUps to be applied to the SuperNode.
   /// </param>
   /// <returns>Generated source string.</returns>
-  string GenerateSuperNodeStatic(
+  string GenerateStaticReflection(
     GenerationItem item, ImmutableArray<PowerUp> appliedPowerUps
   );
 }
@@ -52,7 +52,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
   }
 
   public string GenerateSuperNode(
-    GenerationItem item
+    SuperNodeGenerationItem item
   ) {
     var node = item.SuperNode;
     var powerUps = item.PowerUps;
@@ -66,7 +66,6 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
     return Format($$"""
     #pragma warning disable
     #nullable enable
-    using Godot;
     using SuperNodes.Types;
 
     {{If(
@@ -101,11 +100,11 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
     """).Clean();
   }
 
-  public string GenerateSuperNodeStatic(
+  public string GenerateStaticReflection(
     GenerationItem item, ImmutableArray<PowerUp> appliedPowerUps
   ) {
-    var node = item.SuperNode;
-    var powerUpHooks = node.PowerUpHooksByFullName;
+    var superItem = item.SuperObj;
+    var powerUpHooks = superItem.PowerUpHooksByFullName;
     var typeParameterSubstitutions = SuperNodeGeneratorService
       .GetTypeParameterSubstitutions(
         appliedPowerUps,
@@ -120,14 +119,14 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
 
     // Combine properties and fields from the node script and all of its
     // applied power-ups.
-    var propsAndFields = node.PropsAndFields
+    var propsAndFields = superItem.PropsAndFields
       .Concat(propsAndFieldsFromPowerUps)
       .OrderBy(propOrField => propOrField.Name)
       .ToImmutableArray();
 
     // Combine usings from the node script and all of its applied power-ups.
     // (For any imported constants used in attribute constructors in the tables)
-    var allUsings = node.Usings
+    var allUsings = superItem.Usings
       .Concat(appliedPowerUps.SelectMany(powerUp => powerUp.Usings))
       .Concat(StaticUsings)
       .Distinct();
@@ -146,13 +145,18 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
       .GenerateStaticPropsAndFields(propsAndFields);
 
     var getTypeFn = SuperNodeGeneratorService
-      .GenerateGetType(node.Name, propsAndFields);
+      .GenerateGetType(superItem.Name, propsAndFields);
 
     var getPropertyOrFieldFn = SuperNodeGeneratorService
-      .GenerateGetPropertyOrField(node.Name, propsAndFields);
+      .GenerateGetPropertyOrField(superItem.Name, propsAndFields);
 
     var setPropertyOrFieldFn = SuperNodeGeneratorService
-      .GenerateSetPropertyOrField(node.Name, propsAndFields);
+      .GenerateSetPropertyOrField(superItem.Name, propsAndFields);
+
+    var typeDeclarationKeyword = superItem.IsRecord ? "record" : "class";
+    var @interface = superItem is SuperNode
+      ? "ISuperNode"
+      : "ISuperObject";
 
     return Format($$"""
     #pragma warning disable
@@ -160,10 +164,10 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
     {{usings}}
 
     {{If(
-      node.Namespace is not null,
-      $$"""namespace {{node.Namespace}} {"""
+      superItem.Namespace is not null,
+      $$"""namespace {{superItem.Namespace}} {"""
     )}}
-      partial class {{node.Name}} : ISuperNode {
+      partial {{typeDeclarationKeyword}} {{superItem.Name}} : {{@interface}} {
         {{propsAndFieldsReflectionTable}}
 
         {{getTypeFn}}
@@ -173,7 +177,7 @@ public class SuperNodeGenerator : ChickensoftGenerator, ISuperNodeGenerator {
         {{setPropertyOrFieldFn}}
       }
     {{If(
-      node.Namespace is not null,
+      superItem.Namespace is not null,
       "}"
     )}}
     #nullable disable

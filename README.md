@@ -18,7 +18,8 @@ SuperNodes is a C# source generator that gives superpowers to Godot node scripts
 
 SuperNodes can do a LOT — [check out the official documentation][docs] for usage details.
 
-- ✅ Apply PowerUps (essentially mixins for C#) to any class that extends a Godot `Node` or `GodotObject`.
+- ✅ Apply PowerUps (essentially mixins for C#) to any class or record.
+- ✅ PowerUps applied to a `GodotObject` or Godot `Node` can hook into the node's lifecycle, observing events and running code before user script callbacks.
 - ✅ Use third-party source generators alongside Godot's official source generators.
 - ✅ Get and set the value of script properties and fields at runtime, without using reflection.
 - ✅ Examine the attributes and types of script properties and fields at runtime, without using reflection.
