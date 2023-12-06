@@ -345,9 +345,6 @@ public class CodeService : ICodeService {
         var isInitOnly = property.SetMethod?.IsInitOnly == true;
         isMutable = !property.IsReadOnly && !property.IsAbstract && !isInitOnly;
         isReadable = !property.IsWriteOnly;
-        var hasExplicitInterfaceImplementations = property
-          .ExplicitInterfaceImplementations
-          .Any();
         var correspondingInterfaceMembers = member
           .ExplicitOrImplicitInterfaceImplementations();
         var declaredInInterface = correspondingInterfaceMembers.Any();
