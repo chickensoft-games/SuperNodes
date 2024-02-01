@@ -61,6 +61,8 @@ public class PowerUpGenerator : ChickensoftGenerator, IPowerUpGenerator {
         )
       )
     )
+    // Strip where clauses
+    .WithConstraintClauses(new SyntaxList<TypeParameterConstraintClauseSyntax>())
     // Change power up name to the node's name.
     .WithIdentifier(SyntaxFactory.Identifier(node.Name))
     .WithTypeParameterList(null)
